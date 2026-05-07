@@ -23,6 +23,16 @@ Parse the assignment and produce `docs/INTAKE.md`:
 - Requirements, constraints, inputs/outputs, edge cases, out of scope.
 
 Produce `docs/QUESTIONS.md` with clarifying questions grouped by: requirements, constraints, edge cases.
+Every question in `docs/QUESTIONS.md` must be followed by a blank `**Answer:**` line for the user to fill in.
+`docs/QUESTIONS.md` must always include a **Complexity & Scale** section with:
+- Expected input size / volume (affects time complexity target)
+- Memory constraints (affects space complexity approach)
+- Performance requirements (latency, throughput)
+- Should the solution be optimized for time, space, or readability?
+
+Also read the **Universal Questions Checklist** in `STANDARDS.md` and include
+any applicable questions in `docs/QUESTIONS.md`.
+
 
 **Stop here. Wait for the user to answer questions in `docs/QUESTIONS.md` before continuing.**
 

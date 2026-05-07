@@ -3,7 +3,37 @@
 This file captures recurring technical decisions with their tradeoffs.
 Before designing any solution, Claude reads this file and recommends the
 appropriate option for the current context. The confirmed choice is logged
-in the per-assignment `DECISIONS.md`.
+in the per-assignment `docs/DECISIONS.md`.
+
+---
+
+## Universal Questions Checklist
+
+Always include applicable questions from this list in `docs/QUESTIONS.md` during intake.
+
+### Complexity & Scale
+- What is the expected input size / volume?
+- Are there memory constraints?
+- Are there latency or throughput requirements?
+- Should the solution optimize for time, space, or readability — or balance all three?
+
+### Correctness & Edge Cases
+- How should invalid input be handled — raise exception, return sentinel value, or silently ignore?
+- Are there numeric edge cases to handle — zero, negative numbers, float precision, overflow?
+- Is the input guaranteed to be non-empty, or must empty input be handled?
+- Are there ordering guarantees on the input, or must the solution handle arbitrary order?
+
+### Concurrency
+- Will this run single-threaded, or could it be called concurrently?
+- Is shared state involved?
+
+### Persistence
+- Should any state survive between calls or runs?
+- Is there a storage format requirement (file, db, in-memory only)?
+
+### Output
+- Is there an exact output format required (rounding, sorting, structure, encoding)?
+- Should errors be surfaced to the caller or logged silently?
 
 ---
 
@@ -99,7 +129,7 @@ in the per-assignment `DECISIONS.md`.
 ### Options
 
 #### 1. `pydantic` models
-- See validation section above — same tradeoffs apply
+See Input Validation → pydantic. Same tradeoffs apply.
 
 #### 2. `dataclass`
 **Best for:** plain data containers, no validation needed, stdlib-only
@@ -144,9 +174,69 @@ in the per-assignment `DECISIONS.md`.
 **Best for:** complex CLIs, widely known in industry
 
 ---
-## future areas to add: 
 
-## async vs sync 
-## logging strategy
-## persistence (if any)
-## testing patterns beyond the basics
+## Async vs Sync
+
+### Options
+
+#### 1. Synchronous (default)
+**Best for:** most home assignments, CPU-bound work, no I/O concurrency needed
+
+**Pros:** simple, predictable, easy to test
+**Cons:** blocks on I/O
+
+#### 2. `asyncio`
+**Best for:** I/O-bound tasks, multiple concurrent operations (e.g. fetching URLs)
+
+**Pros:** non-blocking, scales well for I/O
+**Cons:** complexity creep, testing requires async-aware tools (`pytest-asyncio`)
+
+---
+
+## Logging Strategy
+
+### Options
+
+#### 1. No logging (default for assignments)
+**Best for:** pure algorithm problems, short-lived scripts
+
+#### 2. `logging` stdlib
+**Best for:** any assignment with meaningful runtime state or error paths worth tracing
+
+**Pros:** stdlib, configurable levels, no dependencies
+**Cons:** boilerplate setup
+
+#### 3. `loguru`
+**Best for:** when readable logs matter and external deps are allowed
+
+**Pros:** zero config, beautiful output, easy file rotation
+**Cons:** external dependency
+
+---
+
+## Testing Patterns
+
+### Options
+
+#### 1. Plain `pytest` functions (default)
+**Best for:** most cases — fast, readable, minimal boilerplate
+
+#### 2. Parametrize (`@pytest.mark.parametrize`)
+**Best for:** same logic tested across many input/output pairs
+
+**Pros:** DRY, scales well, clear failure messages
+**Cons:** can obscure intent if overused
+
+#### 3. Fixtures
+**Best for:** shared setup (e.g. a pre-built object used across many tests)
+
+**Pros:** reusable, clean separation of setup and assertion
+**Cons:** indirection can make tests harder to read in isolation
+
+#### 4. Mocking (`unittest.mock` or `pytest-mock`)
+**Best for:** isolating units from external dependencies (I/O, APIs, time)
+
+**Pros:** true unit isolation
+**Cons:** mocks can drift from real behaviour — use sparingly
+
+---
