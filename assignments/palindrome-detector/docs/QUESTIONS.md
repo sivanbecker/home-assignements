@@ -2,24 +2,51 @@
 
 ## Requirements
 1. What should the function return? A boolean, or should it print a message?
-** answer ** boolean
+**Answer:** boolean
+
 2. Should numeric characters be treated as characters to check (e.g., "12321" → True)?
-** answer ** yes
+**Answer:** yes
+
 3. What about non-ASCII characters (accents, non-Latin scripts)?
-** answer ** these are invalid. should raise an exception 
+**Answer:** these are invalid. should raise an exception
 
 ## Constraints
 1. Should empty string be considered a palindrome (True or False)?
-** answer ** yes
+**Answer:** yes
+
 2. Should a string with only spaces/punctuation be considered a palindrome?
-** answer ** no
+**Answer:** no
+
 3. How should the function handle None or non-string input?
-** answer ** invalid input. raise exception
+**Answer:** invalid input. raise exception
 
 ## Edge Cases
 1. Single character string — should it be a palindrome?
-** answer ** yes
+**Answer:** yes
+
 2. Very long strings — are there performance constraints?
-** answer ** code should support O(n) time constraint 
+**Answer:** code should support O(n) time complexity
+
 3. Unicode characters with diacritics (e.g., "café") — normalize them or treat as-is?
-** answer ** as is
+**Answer:** as is
+
+## Complexity & Scale
+1. What is the expected input size / volume?
+**Answer:** upto 1 million chars
+
+2. Are there memory constraints?
+**Answer:** 4Mb constraint
+
+3. Are there latency or throughput requirements?
+**Answer:** no but note time complexity mentioned.
+
+4. Should the solution optimize for time, space, or readability — or balance all three?
+**Answer:** balance
+
+## Correctness & Output
+1. Is there an exact output format required?
+**Answer:** no just boolean or exception
+
+2. Should errors be surfaced to the caller or logged silently?
+**Answer:** surfaced
+
