@@ -1,13 +1,4 @@
-# Python Home Assignment Instructions (TDD)
-
-## Project Structure
-- Source code: `src/`
-- Tests: `src/tests/`
-- Documentation: `docs/` (all .md files except this one)
-
-## Technical Environment
-- Python 3.12+, `uv` for dependencies (`uv add`, `uv run`)
-- Testing: `pytest` | Linting: `ruff`
+# Home Assignment Instructions (TDD)
 
 ## Core Principles
 
@@ -30,5 +21,14 @@
 
 ### Workflow
 For the step-by-step assignment workflow (Intake → Standards → Design → TDD → Debrief), use the `/new-py-assignment` skill. It automates folder structure creation and guides you through each phase with explicit stop points for decisions and approvals.
+
+**For complex assignments with large codebases:**
+- Design phase produces a concise, actionable document listing all modules, classes, functions, and data flow
+- Design includes an implementation checklist to track progress across all components
+- TDD phase has frequent stopping points for review:
+  - Stop after each test file is created (before tests are written) — preview what will be tested
+  - Stop after each test class is fully written — show all test functions for that class
+  - Stop after each module/class/function is implemented — 1-line summary + link to code
+  - Always wait for explicit approval before proceeding
 
 Reference `STANDARDS.md` for technical decision options (validation, error handling, data modeling, CLI, async, logging, testing patterns).

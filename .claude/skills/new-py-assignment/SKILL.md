@@ -23,6 +23,9 @@ This skill automates the setup and guides you through the complete TDD-driven Py
 
 **Input:** assignment name and description
 
+**Before starting:**
+- Create a new git branch named `work/<assignment-name>`
+
 **Output:** 
 - Folder structure: `assignments/<assignment-name>/`
 - Stub files: `assignment.md`, `src/`, `src/tests/`, `docs/`
@@ -48,22 +51,37 @@ Read `STANDARDS.md` and present decision options for:
 
 Produce `docs/DESIGN.md`:
 - Domain concepts and language
-- Module breakdown
-- Data flow diagrams (as text descriptions)
-- Chosen design patterns with rationale
+- **Module breakdown** — each module name, responsibility, what it exposes
+- **Class/function signatures** — the interface for each major component (not full code)
+- **Data flow** — text description of how data moves between modules
+- **Chosen design patterns** with rationale
 - Storage/persistence model
+- **Implementation checklist** — all modules, classes, functions to be built (used to track progress during TDD)
+
+The design should be concise and actionable — clear enough that someone could implement from it without guesswork.
 
 **Stop point:** Wait for user approval before writing tests
 
-### Phase 4: TDD Execution
+### Phase 4: TDD Execution — Frequent Review Stopping Points
 
-1. Write failing test in `src/tests/test_*.py`
-2. Implement minimum code in `src/` to pass test (Green)
-3. Refactor if needed, keeping tests passing
-4. Commit after each Green or Refactor step
-5. Repeat until all requirements are met
+For each test file:
+
+1. **Stop: Test file creation** — Show the test file path and what it will test (which module/classes), wait for approval to proceed
+
+2. **Write test class** — All test functions for one class
+   - **Stop: Test class complete** — Show all test functions written for that class, wait for approval before implementing
+
+3. **Implement corresponding module/class** — Write minimum code to make tests pass (Green)
+   - **Stop: Implementation complete** — Show 1-line summary + link to the code, wait for approval before next step
+
+4. **Refactor** (if needed) while keeping tests passing
+   - Commit after Green or Refactor step
+
+5. **Repeat** — Next test class or test file
 
 **Update:** Record any significant decisions in `docs/DECISIONS.md` as you go
+
+**For large assignments:** Use the implementation checklist from `docs/DESIGN.md` to track progress. Show progress after each module/class is complete.
 
 ### Phase 5: Debrief
 
@@ -102,10 +120,12 @@ Then follow the prompts. The skill will:
 ## Important Notes
 
 - **Follow the stop points** — don't skip ahead. Each phase builds on the previous one.
+- **Frequent review stops during TDD** — for large assignments, you'll review after each test class and after each module/class implementation. This keeps the scope visible and manageable.
 - **One failing test per commit** in the TDD phase. Write test → make it fail → implement → make it pass → commit.
 - **Type hints on all function signatures** — non-negotiable.
 - **Test names describe behavior** — use `test_should_return_error_when_...` pattern.
 - **Commit after every Green or Refactor step** — not just at the end.
+- **Design conciseness** — the design doc should be brief and actionable, not encyclopedic. Assume the reader can code.
 
 ## Directory Structure After Setup
 
