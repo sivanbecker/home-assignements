@@ -4,10 +4,15 @@ version = "0.1.0"
 description = "Home assignment solutions"
 readme = "README.md"
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    "pandas>=2.0.0",
+    "fastapi>=0.100.0",
+    "uvicorn>=0.20.0",
+]
 
 [dependency-groups]
 dev = [
     "pytest>=9.0.3",
     "ruff",
+    "httpx>=0.24.0",
 ]

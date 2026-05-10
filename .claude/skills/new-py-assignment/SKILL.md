@@ -19,12 +19,28 @@ This skill automates the setup and guides you through the complete TDD-driven Py
 
 ## Workflow
 
-### Phase 1: Setup & Intake
+### Phase 1: Setup & Intake (Fast Intake Mode — 10–15 minutes)
 
 **Input:** assignment name and description
 
 **Before starting:**
 - Create a new git branch named `work/<assignment-name>`
+
+**docs/INTAKE.md (compact, under 3 minutes to read):**
+1. **Functional requirements** — bullet list of behaviors only (no implementation details)
+2. **Constraints and edge cases** — bullet list of limits, input quirks, special cases
+
+**docs/QUESTIONS.md (3–5 high-impact questions only):**
+- Select only 3–5 questions with the biggest design impact, typically from:
+  - Input size / performance  
+  - Error handling strategy (exceptions vs skipping vs ignoring)  
+  - Exact output format (ordering, rounding, encoding)  
+  - Persistence (state across runs) if relevant  
+  - Concurrency (single-threaded vs concurrent) if relevant  
+- For each question, add an "assumption stub" line so you can document assumptions if you don't ask the interviewer
+- Add a final section:
+  - "Recommended questions to ask interviewer" (1–3 with biggest impact)  
+  - "Questions to convert into explicit assumptions" (the rest)
 
 **Output:** 
 - Folder structure: `assignments/<assignment-name>/`
@@ -33,55 +49,124 @@ This skill automates the setup and guides you through the complete TDD-driven Py
 
 **Stop point:** Wait for user to answer questions in `docs/QUESTIONS.md`
 
-### Phase 2: Standards Review
+### Phase 2: Standards Review (5–10 minutes)
 
-Read `STANDARDS.md` and present decision options for:
-- Input validation (pydantic vs dataclass vs manual)
-- Error handling (custom exceptions vs built-in vs Result type)
-- Data modeling (pydantic vs dataclass vs dict)
-- CLI interface (argparse vs typer vs click) — if applicable
-- Async vs Sync
-- Testing patterns (pytest functions, parametrize, fixtures, mocks)
+**Default Standards Profile (assume unless assignment clearly needs deviation):**
+- **Input validation:** Manual checks or simple dataclasses (not pydantic unless complex structured data)
+- **Error handling:** Built-in exceptions (ValueError, TypeError) with clear messages
+- **Data modeling:** Plain dicts or small dataclasses where helpful
+- **Async vs sync:** Synchronous only, unless explicitly required
+- **Testing pattern:** Plain pytest functions with light parametrization only when it improves readability
 
-**Output:** `docs/DECISIONS.md` with confirmed choices and rationale
+**Review process:**
+- Assume this default profile for the assignment
+- Only propose deviations when the assignment text clearly justifies it
+- Document the rationale briefly
 
-**Stop point:** Wait for user confirmation on all decision points
+**Output:** `docs/DECISIONS.md` — at most 8 short bullet points summarizing chosen options and rationale (readable in under 2 minutes)
 
-### Phase 3: Design
+**Stop point:** After writing `docs/DECISIONS.md`, stop and wait for user review before proceeding to Design phase
 
-Produce `docs/DESIGN.md`:
-- Domain concepts and language
-- **Module breakdown** — each module name, responsibility, what it exposes
-- **Class/function signatures** — the interface for each major component (not full code)
-- **Data flow** — text description of how data moves between modules
-- **Chosen design patterns** with rationale
-- Storage/persistence model
-- **Implementation checklist** — all modules, classes, functions to be built (used to track progress during TDD)
+### Phase 3: Design (Tiny, Executable Design — under 3 minutes to read)
 
-The design should be concise and actionable — clear enough that someone could implement from it without guesswork.
+**Size constraints:**
+- Maximum 3 modules
+- Maximum 5 total functions/classes
+- No long prose; keep everything tight and action-oriented
+
+**Module structure (prefer simple patterns like):**
+- An input/output or CLI layer
+- A core logic layer
+- Optionally a small models/types layer
+- If the problem is small, merge modules to keep structure minimal
+
+**Produce `docs/DESIGN.md` with these sections:**
+
+1. **Module breakdown** — for each module:
+   - Name and responsibility (one sentence)
+   - What it exposes (function/class names only)
+
+2. **Function/class signatures** — for each major component:
+   - Name  
+   - Parameters with type hints  
+   - Return type  
+   - One-sentence responsibility in plain language
+
+3. **Data flow** — numbered list of 4–8 steps (no paragraphs), example:
+   - 1: Read input from X  
+   - 2: Validate/parse into Y  
+   - 3: Transform Y into Z via core logic  
+   - 4: Format Z into final output  
+
+4. **Implementation checklist** — all modules, functions, classes to be built:
+   - Mark each as "must-have" or "nice-to-have"
+   - Use this to track progress during TDD and manage time
 
 **Stop point:** Wait for user approval before writing tests
 
-### Phase 4: TDD Execution — Frequent Review Stopping Points
+### Phase 4: TDD Execution — Pattern-Based Review at Every Stop
 
-For each test file:
+For each test file and corresponding implementation:
 
-1. **Stop: Test file creation** — Show the test file path and what it will test (which module/classes), wait for approval to proceed
+#### Step 1: Create Test File
 
-2. **Write test class** — All test functions for one class
-   - **Stop: Test class complete** — Show all test functions written for that class, wait for approval before implementing
+**Stop: Test file creation** — Show test file path and scope (which module/classes being tested), wait for approval to proceed.
 
-3. **Implement corresponding module/class** — Write minimum code to make tests pass (Green)
-   - **Stop: Implementation complete** — Show 1-line summary + link to the code, wait for approval before next step
+#### Step 2: Write Tests for One Class
 
-4. **Refactor** (if needed) while keeping tests passing
-   - Commit after Green or Refactor step
+**Writing tests:**
+- Group tests by behavior using section comments:
+  - `# Happy path`
+  - `# Invalid input`
+  - `# Edge cases (empty, max size, boundary values)`
+- Use behavior-style names: `test_should_return_error_when_input_is_negative`
 
-5. **Repeat** — Next test class or test file
+**Stop: Test class complete** — Show all test functions, then generate a compact review summary (under 1 minute to read):
 
-**Update:** Record any significant decisions in `docs/DECISIONS.md` as you go
+1. **Behavior coverage**: Bullet list of which behavior categories are covered vs. missing
+   - Example: "Covered: happy path, invalid input. Missing: large input size, boundary values."
+2. **Test style note**: Whether tests target public behavior (per design) vs. implementation details; whether parametrization/fixtures are used helpfully
+3. **Suggested additions** (1–3 concrete tests):
+   - Boundary cases (min/max, empty)
+   - Performance/large-input case if size matters
+   - Key invalid or malformed input
+4. **Decision point**: "Add these tests now, or proceed to implementation?"
 
-**For large assignments:** Use the implementation checklist from `docs/DESIGN.md` to track progress. Show progress after each module/class is complete.
+If adding tests: generate only those tests, stop again for review. Otherwise, proceed to implementation.
+
+#### Step 3: Implement Module/Class
+
+**After making tests pass (Green):**
+
+**Stop: Implementation complete** — Generate two short summaries (under 2 minutes total to read):
+
+**1. What was implemented:**
+- New/changed public functions/classes:
+  - Name, parameters (with types), return type
+  - One-sentence responsibility in plain language
+- Where it fits in data flow: "This is step X of the data flow: [brief description]"
+
+**2. Standards checklist** (mark each as "OK" or "Check"):
+- ✓ Type hints on all new/modified functions
+- ✓ Error handling consistent with `docs/DECISIONS.md` (e.g., ValueError with clear messages)
+- ✓ No unnecessary abstraction for this assignment's scale
+- ✓ Code behavior matches test descriptions (no hidden responsibilities)
+
+If any item is "Check", explain why briefly and ask: "Propose a small refactor now, or leave as-is and proceed?"
+
+**3. Interview rehearsal (after completing a core module or major chunk):**
+- 3–5 likely interview questions about this code
+- Clearly separate "Questions (for you to practice)" and "Sample answers (reference only)"
+
+#### Step 4: Refactor (if needed)
+
+While keeping tests passing, clean up code. Commit after Green or Refactor step.
+
+#### Step 5: Repeat
+
+Next test class or test file, using the implementation checklist from `docs/DESIGN.md` to track progress.
+
+**For large assignments:** Show progress summary after each module/class is complete (which checklist items are done, which remain).
 
 ### Phase 5: Debrief
 
