@@ -1,5 +1,4 @@
-import { TaskManager } from '../taskManager';
-import { TaskError } from '../types';
+import { TaskManager, TaskError } from '../index';
 
 describe('TaskManager', () => {
   let manager: TaskManager;
