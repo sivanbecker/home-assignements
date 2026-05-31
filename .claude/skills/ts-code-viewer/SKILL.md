@@ -1,131 +1,191 @@
 # Skill: ts-code-viewer
 
-Purpose: produce a self-contained review package for a TypeScript assignment by orchestrating three sub-skills — graph scouting, Mermaid diagram generation, and architectural review — then writing the results into `docs/` files inside the assignment folder.
+Purpose: produce a self-contained review package for a TypeScript assignment by orchestrating six sub-skills — graph scouting, Mermaid diagram generation, architectural review, class diagrams, call-flow diagrams, and review slices — then writing the results into `docs/` files inside the assignment folder.
 
 When to use:
-- After an assignment has been implemented and you want a structural + architectural view before or during review.
+- After an assignment has been implemented and you want a structural + internal view before or during review.
 - When you want persistent Markdown artifacts in the assignment repo (renderable in VS Code, GitHub, mermaid.live).
 - When preparing for an interview debrief or code walkthrough.
 
 ## What this skill produces
 
-Two files written into `assignments/<name>/docs/`:
+Three files written into `assignments/<name>/docs/`:
 
-| File | Contents |
-|---|---|
-| `docs/ARCHITECTURE.md` | Mermaid diagrams: layered architecture, actual import graph, risk map. Module summary table. |
-| `docs/REVIEW.md` | Architectural review findings: structural summary, review priorities, risks, questions for the implementer, suggested refactors. |
+| File | Contents | Skills used |
+|---|---|---|
+| `docs/ARCHITECTURE.md` | Module-level diagrams: layered architecture, actual import graph, risk map, module summary table | `ts-code-graph-scout` + `ts-code-graph-mermaid` + `ts-code-review-architecture` |
+| `docs/INTERNALS.md` | Code-internal diagrams: class diagram, call-flow diagrams, review slices | `internal-class-diagram` + `internal-callflow-diagram` + `code-review-slice-diagrams` |
+| `docs/REVIEW.md` | Architectural review findings: structural summary, ranked priorities, risks, questions, refactors | `ts-code-review-architecture` |
 
-## How it works
+---
 
-This skill runs three sub-skills in sequence and synthesizes their output into the two doc files.
+## Step 1 — Module Graph (ts-code-graph-scout)
 
-### Step 1 — code-graph-scout
-
-Run the `ts-code-graph-scout` skill on the assignment.
-
-Collect:
-- Repo shape (single package vs monorepo)
-- All modules and their import edges
-- In-degree / out-degree per module
-- Cycles (if any)
-- Hotspot candidates (high centrality nodes)
-- Any boundary violations
-
-If `dependency-cruiser` is not installed, install it as a dev dependency:
+Install dependency-cruiser if not present:
 ```bash
-cd assignments/<name> && npm install --save-dev dependency-cruiser
+npm install --save-dev dependency-cruiser
 ```
 
-Then run:
+Run:
 ```bash
 ./node_modules/.bin/depcruise src --no-config --output-type json --ts-config tsconfig.json
 ```
 
-Parse the JSON to extract modules, dependencies, and dependents.
+Collect from the JSON output:
+- All modules and their import edges
+- In-degree / out-degree per module
+- Cycles (if any)
+- Boundary violations (tests importing implementation directly, etc.)
+- Hotspot candidates (high centrality nodes)
 
-### Step 2 — code-graph-mermaid
+---
 
-Using the scout findings, generate three diagrams:
+## Step 2 — Module Diagrams (ts-code-graph-mermaid → ARCHITECTURE.md)
 
-1. **Layered architecture map** (`flowchart TD`) — group modules into subgraphs by layer (Tests / Public API / Domain Logic / Data Model / Infra). Show intended dependency direction.
+Generate three diagrams:
 
-2. **Actual import graph** (`graph LR`) — show exact edges as observed by dependency-cruiser. Annotate violations or bypasses.
+1. **Layered architecture** (`flowchart TD`) — group into subgraphs by layer (Tests / Public API / Domain Logic / Data Model / Infra). Show intended dependency direction.
 
-3. **Risk map** — show any boundary violations, cycles, or suspicious imports with `⚠️` labels. If none exist, show the clean state and note it explicitly. If a boundary was previously violated and fixed, show the before-state for interview discussion.
+2. **Actual import graph** (`graph LR`) — show exact edges from dependency-cruiser. Annotate any violations with `⚠️`.
 
-Rules:
-- Max 20 nodes per diagram.
-- Use subgraphs to group by layer.
-- Annotate edges that cross layer boundaries unexpectedly.
-- Add 2-4 bullet notes under each diagram.
+3. **Risk map** — show boundary violations, cycles, or suspicious imports. If the current state is clean, show the before/after of any fix made during the assignment for interview discussion.
 
-### Step 3 — code-review-architecture
+Rules: max 20 nodes per diagram, add 2–4 bullet notes under each.
 
-Using scout findings + diagrams, produce a structured architectural review:
-
-1. **Structural summary** — What layers exist? Is the dependency direction clean? What is the center of gravity?
-2. **Review priorities** — Ranked list (high / medium / low) of structural observations. Tie each to a specific file, edge, or node.
-3. **Likely risks** — Correctness risks vs. maintainability risks. Distinguish clearly.
-4. **Questions for the implementer** — 3-5 questions a reviewer or interviewer would ask about the architecture.
-5. **Suggested refactors** — Only what is proportionate to the assignment size. Do not over-engineer recommendations.
-
-### Step 4 — Write docs
-
-Write two files:
-
-**`docs/ARCHITECTURE.md`**
+Write `docs/ARCHITECTURE.md`:
 ```
 # Architecture
+> Generated by /ts-code-viewer on <date>
 
 ## Layered Architecture
-<diagram 1 + bullets>
+<diagram + bullets>
 
 ## Actual Import Graph
-<diagram 2 + bullets>
+<diagram + bullets>
 
 ## Risk Map
-<diagram 3 + bullets>
+<diagram + bullets>
 
 ## Module Summary
-<table: module | layer | exports | dependents>
+<table: module | layer | exports | in-degree | out-degree>
 ```
 
-**`docs/REVIEW.md`**
+---
+
+## Step 3 — Class Diagram (internal-class-diagram → INTERNALS.md)
+
+Read all source files. Extract:
+- All exported classes and interfaces
+- Public methods and key private fields (only those meaningful to a reviewer)
+- Inheritance (`<|--`), implementation (`<|..`), dependency (`..>`), association (`-->`)
+- Type aliases that materially shape the public API
+
+Generate a `classDiagram` showing the full exported API surface of the assignment.
+
+Rules: max 12 classes/interfaces per diagram. Split by layer if mixed.
+
+Add review bullets:
+- Which class is the center of gravity
+- Whether any class appears too broad
+- Whether public API is clean or leaky
+- Whether relationships are stable or over-coupled
+
+---
+
+## Step 4 — Call-Flow Diagrams (internal-callflow-diagram → INTERNALS.md)
+
+For each public method on the main class (or exported function set), generate:
+
+**Per-method static call graph** (`flowchart TD`):
+- Entry: the public method
+- Internal steps: validation, transformation, storage, error branches
+- Show error paths explicitly
+
+**One sequence diagram** for the most important end-to-end path (e.g. `addTask` from test through to Map mutation):
+- Participants: Test, index.ts, MainClass, types/model
+- Show the happy path in order
+- Show where errors branch off
+
+Rules: one diagram per public method for the call graph, one shared sequence diagram for the main path.
+
+---
+
+## Step 5 — Review Slices (code-review-slice-diagrams → INTERNALS.md)
+
+Generate a 4-diagram review slice pack:
+
+1. **Entry-point slice** — test/consumer → public API → core class → model
+2. **Success-path slice** — sequence diagram of the main happy path
+3. **Failure-path slice** — flowchart showing validation and error branches for all methods
+4. **Boundary-risk slice** — highlight any cross-layer risks; if none, show the clean boundary and note it explicitly
+
+Each slice: title, review question, why it matters, diagram, 3–6 bullets.
+
+Write `docs/INTERNALS.md`:
+```
+# Internals
+
+## Class Diagram
+<classDiagram + bullets>
+
+## Call-Flow: <MethodName>
+<flowchart per public method>
+
+## Sequence: Main Path
+<sequenceDiagram>
+
+## Review Slices
+
+### 1. Entry-Point Slice
+### 2. Success-Path Slice
+### 3. Failure-Path Slice
+### 4. Boundary-Risk Slice
+```
+
+---
+
+## Step 6 — Architectural Review (ts-code-review-architecture → REVIEW.md)
+
+Using scout findings + all diagrams, produce:
+
+1. **Structural summary** — layers, dependency direction, center of gravity
+2. **Review priorities** — ranked High / Medium / Low, tied to specific files/edges/nodes
+3. **Likely risks** — correctness risks vs. maintainability risks, clearly separated
+4. **Questions for the implementer** — 3–5 questions a reviewer or interviewer would ask
+5. **Suggested refactors** — proportionate to assignment size only
+
+Write `docs/REVIEW.md`:
 ```
 # Architectural Review
+> Generated by /ts-code-viewer on <date>
 
 ## Structural Summary
-<paragraph>
-
 ## Review Priorities
-<ranked list>
-
 ## Likely Risks
-<correctness vs. maintainability>
-
 ## Questions for the Implementer
-<numbered list>
-
 ## Suggested Refactors
-<numbered list, proportionate>
 ```
 
-## Output confirmation
+---
 
-After writing both files, confirm:
-- File paths written
-- How to view diagrams (VS Code Mermaid extension, mermaid.live, GitHub preview)
-- Which findings are most worth discussing in an interview or PR review
+## Output Confirmation
+
+After writing all three files, confirm:
+- Paths of files written
+- How to view diagrams: VS Code `Cmd+Shift+V`, mermaid.live, GitHub preview
+- Top 1–2 findings worth raising in interview or PR review
+
+---
 
 ## Guardrails
 
 - Do not install dependency-cruiser globally — dev dependency only.
-- Do not generate diagrams with more than 20 nodes.
-- Do not apply enterprise-scale architectural standards to a small assignment.
+- Max 20 nodes per module diagram; max 12 classes per class diagram; max 20 nodes per call-flow diagram.
+- Do not apply enterprise-scale standards to a small assignment.
 - Distinguish "must fix" from "worth discussing" in all review output.
-- If the graph is already clean, say so explicitly rather than inventing problems.
-- If an assignment has no `src/` folder or no TypeScript files, report clearly and stop.
+- If the graph is already clean, say so explicitly — do not invent problems.
+- If an assignment has no `src/` or no TypeScript files, report and stop.
+- Mark all diagrams as structural (static) unless explicitly derived from runtime behavior.
 
 ## Example invocation
 
@@ -133,4 +193,4 @@ After writing both files, confirm:
 /ts-code-viewer
 ```
 
-The skill targets the assignment in the current working directory, or the most recently worked-on assignment in the `assignments/` folder if run from the repo root.
+Targets the assignment in the current working directory, or the most recently worked-on assignment in `assignments/` if run from the repo root.

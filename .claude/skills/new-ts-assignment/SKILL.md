@@ -103,7 +103,60 @@ This skill automates the setup and guides you through the complete TDD-driven Ty
    - Mark each as "must-have" or "nice-to-have"
    - Use this to track progress during TDD and manage time
 
-**Stop point:** Wait for user approval before writing tests
+5. **Pre-implementation Mermaid diagrams** — generate and embed in `docs/DESIGN.md`:
+
+   **Layered architecture** (`flowchart TD`) — planned layers and module relationships before any code is written:
+   ```mermaid
+   flowchart TD
+     subgraph "Public API"
+       index["index.ts"]
+     end
+     subgraph "Domain Logic"
+       core["coreModule.ts"]
+     end
+     subgraph "Data Model"
+       types["types.ts"]
+     end
+     index --> core
+     index --> types
+     core --> types
+   ```
+
+   **Planned class diagram** (`classDiagram`) — planned classes, interfaces, key methods, and relationships:
+   ```mermaid
+   classDiagram
+     class MainClass {
+       +methodA(param) ReturnType
+       +methodB(param) ReturnType
+     }
+     class DomainEntity {
+       +field type
+     }
+     class DomainError {
+       +message string
+     }
+     MainClass ..> DomainEntity : creates
+     MainClass ..> DomainError : throws
+     Error <|-- DomainError
+   ```
+
+   **Planned call-flow** (`flowchart TD`) — one diagram per major public method showing the intended internal steps and error branches:
+   ```mermaid
+   flowchart TD
+     methodA --> validate{valid input?}
+     validate -->|yes| process[process input]
+     validate -->|no| throwError[throw DomainError]
+     process --> store[store result]
+     store --> returnResult[return result]
+   ```
+
+   Rules for pre-implementation diagrams:
+   - Use planned names, not stubs — diagram what you intend to build
+   - Mark all diagrams as "planned" in a subtitle line
+   - Keep to max 12 nodes per diagram
+   - These diagrams are the primary review artifact at the Design stop point
+
+**Stop point:** Present the design doc including all three Mermaid diagrams. Wait for user approval before writing tests.
 
 ### Phase 4: TDD Execution — Pattern-Based Review at Every Stop
 
@@ -156,7 +209,18 @@ If adding tests: generate only those tests, stop again for review. Otherwise, pr
 
 If any item is "Check", explain why briefly and ask: "Propose a small refactor now, or leave as-is and proceed?"
 
-**3. Interview rehearsal (after completing a core module or major chunk):**
+**3. Post-implementation Mermaid diagrams** (after each module/class is fully green):
+
+Generate and embed updated diagrams directly in the stop summary (not in a file — just in chat for quick review):
+
+- **Updated class diagram** — actual class/interface/method names now that implementation is complete. Compare to the planned diagram in `docs/DESIGN.md`: did anything change?
+- **Call-flow for the implemented method** (`flowchart TD`) — actual internal steps as coded, including real branching and error paths
+- **Sequence diagram for the main path** — test → index.ts → class → types, showing the actual execution order
+
+If the implemented diagrams match the planned ones in `docs/DESIGN.md`: note "implementation matches design".
+If they diverge: highlight the delta and ask "Update DESIGN.md to reflect the actual implementation, or refactor to match the plan?"
+
+**4. Interview rehearsal (after completing a core module or major chunk):**
 - 3–5 likely interview questions about this code
 - Clearly separate "Questions (for you to practice)" and "Sample answers (reference only)"
 
@@ -201,7 +265,10 @@ Then follow the prompts. The skill will:
   - `docs/INTAKE.md` — Requirements and constraints
   - `docs/QUESTIONS.md` — Clarifying questions for user input
   - `docs/DECISIONS.md` — Confirmed technical choices
-  - `docs/DESIGN.md` — Architecture and design
+  - `docs/DESIGN.md` — Architecture, design, and **pre-implementation Mermaid diagrams**
+  - `docs/ARCHITECTURE.md` — Post-implementation module graph diagrams (written by `/ts-code-viewer`)
+  - `docs/INTERNALS.md` — Post-implementation class, call-flow, and slice diagrams (written by `/ts-code-viewer`)
+  - `docs/REVIEW.md` — Architectural review findings (written by `/ts-code-viewer`)
   - `docs/DEBRIEF.md` — Retrospective and learnings
 
 ## Important Notes
@@ -228,7 +295,10 @@ assignments/
     │   ├── INTAKE.md           # Requirements, constraints, edge cases
     │   ├── QUESTIONS.md        # Clarifying questions (user fills in answers)
     │   ├── DECISIONS.md        # Confirmed technical decisions
-    │   ├── DESIGN.md           # Architecture and design
+    │   ├── DESIGN.md           # Architecture, design + pre-impl Mermaid diagrams
+    │   ├── ARCHITECTURE.md     # Post-impl module graph (written by /ts-code-viewer)
+    │   ├── INTERNALS.md        # Post-impl class/callflow/slices (/ts-code-viewer)
+    │   ├── REVIEW.md           # Architectural review (/ts-code-viewer)
     │   └── DEBRIEF.md          # Retrospective (end of project)
     └── src/
         ├── index.ts            # Entry point / public API
