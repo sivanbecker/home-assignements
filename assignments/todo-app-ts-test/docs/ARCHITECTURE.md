@@ -21,11 +21,11 @@ flowchart TD
   end
 
   subgraph Domain["Domain Logic"]
-    manager["taskManager.ts\n(TaskManager)"]
+    manager["taskManager.ts (TaskManager)"]
   end
 
   subgraph Model["Data Model"]
-    types["types.ts\n(Task · TaskError)"]
+    types["types.ts (Task · TaskError)"]
   end
 
   test -->|"imports via public API"| index
