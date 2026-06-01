@@ -137,6 +137,12 @@ describe('postQuote', () => {
     ).toThrow(/car-3/);
   });
 
+  it('should validate userId before age', () => {
+    expect(() =>
+      postQuote(makeQuoteRequest({ userId: 'unknown', user: { age: 16, licenseYear: 2010, zipCode: '10001' } }), CURRENT_YEAR),
+    ).toThrow(UserNotFoundError);
+  });
+
   it('should validate age before checking carIds', () => {
     expect(() =>
       postQuote(makeQuoteRequest({ user: { age: 16, licenseYear: 2010, zipCode: '10001' }, carIds: [] }), CURRENT_YEAR),

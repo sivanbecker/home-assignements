@@ -1,4 +1,4 @@
-import { getCarsForUser, CarCategory } from '../src/vendor';
+import { getCarsForUser, userExists, CarCategory } from '../src/vendor';
 import { UserNotFoundError } from '../src/errors';
 
 describe('getCarsForUser', () => {
@@ -46,5 +46,19 @@ describe('getCarsForUser', () => {
     const user2Cars = getCarsForUser('user-2');
     const user1Ids = new Set(user1Cars.map((c) => c.id));
     expect(user2Cars.every((c) => !user1Ids.has(c.id))).toBe(true);
+  });
+});
+
+describe('userExists', () => {
+  it('should return true for a known userId with cars', () => {
+    expect(userExists('user-1')).toBe(true);
+  });
+
+  it('should return true for a known userId with no cars', () => {
+    expect(userExists('user-empty')).toBe(true);
+  });
+
+  it('should return false for an unknown userId', () => {
+    expect(userExists('unknown')).toBe(false);
   });
 });
