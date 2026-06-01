@@ -1,6 +1,5 @@
 import type { FastifySchema } from 'fastify';
 import type { VendorCar } from './vendor';
-import type { UserProfile } from './pricing';
 
 export interface PostLemoBody {
   name: string;
@@ -31,6 +30,12 @@ export const getLemoSchema: FastifySchema = {
 
 // ─── Cars / Quote domain types ────────────────────────────────────────────────
 
+export interface UserProfile {
+  readonly age: number;
+  readonly licenseYear: number;
+  readonly zipCode: string;
+}
+
 export interface InsurableCar extends VendorCar {
   readonly insurable: boolean;
 }
@@ -38,7 +43,7 @@ export interface InsurableCar extends VendorCar {
 export interface QuoteRequest {
   readonly userId: string;
   readonly user: UserProfile;
-  readonly carIds: string[];
+  readonly carIds: readonly string[];
 }
 
 export interface CarQuote {
@@ -47,7 +52,7 @@ export interface CarQuote {
 }
 
 export interface QuoteResult {
-  readonly quotes: CarQuote[];
+  readonly quotes: readonly CarQuote[];
   readonly combinedPremium: number;
 }
 

@@ -8,9 +8,9 @@ import {
   valueRule,
   isInsurable,
   getInsurabilityFailures,
-  type UserProfile,
 } from '../src/pricing';
 import { CarCategory, type VendorCar } from '../src/vendor';
+import type { UserProfile } from '../src/schemas';
 
 const BASE_YEAR = 2024;
 

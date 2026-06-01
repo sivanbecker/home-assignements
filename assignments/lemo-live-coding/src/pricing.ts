@@ -1,10 +1,5 @@
 import { CarCategory, type VendorCar } from './vendor';
-
-export interface UserProfile {
-  readonly age: number;
-  readonly licenseYear: number;
-  readonly zipCode: string;
-}
+import type { UserProfile } from './schemas';
 
 export type RiskFactor = (profile: UserProfile, car: VendorCar, currentYear: number) => number;
 export type InsurabilityRule = (car: VendorCar) => string | null;
