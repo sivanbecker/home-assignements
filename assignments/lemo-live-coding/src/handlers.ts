@@ -1,5 +1,5 @@
 import type { FastifyRequest, FastifyReply } from 'fastify';
-import type { PostLemoBody, QuoteRequest } from './schemas';
+import type { PostLemoBody, QuoteRequest } from './types';
 import { getLemo, postLemo, getCars, postQuote } from './controllers';
 import { QuoteError } from './errors';
 

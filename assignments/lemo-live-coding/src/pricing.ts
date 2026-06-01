@@ -1,5 +1,5 @@
 import { CarCategory, type VendorCar } from './vendor';
-import type { UserProfile } from './schemas';
+import type { UserProfile } from './types';
 
 const BASE_PREMIUM = 1000;
 const YOUNG_DRIVER_AGE_THRESHOLD = 25;

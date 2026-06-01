@@ -1,4 +1,4 @@
-import type { PostLemoBody, PostLemoResponse, InsurableCar, QuoteRequest, QuoteResult } from './schemas';
+import type { PostLemoBody, PostLemoResponse, InsurableCar, QuoteRequest, QuoteResult } from './types';
 import { getCarsForUser, userExists } from './vendor';
 import { calculatePremium, isInsurable, getInsurabilityFailures, MULTI_CAR_MIN_COUNT, MULTI_CAR_DISCOUNT_FACTOR } from './pricing';
 import {

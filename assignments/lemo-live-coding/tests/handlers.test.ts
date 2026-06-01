@@ -1,6 +1,6 @@
 import { getLemoHandler, postLemoHandler, getCarsHandler, postQuoteHandler } from '../src/handlers';
 import type { FastifyRequest, FastifyReply } from 'fastify';
-import type { PostLemoBody, QuoteRequest } from '../src/schemas';
+import type { PostLemoBody, QuoteRequest } from '../src/types';
 import {
   UserNotFoundError,
   CarNotFoundError,

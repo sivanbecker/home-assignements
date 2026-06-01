@@ -10,7 +10,7 @@ import {
   getInsurabilityFailures,
 } from '../src/pricing';
 import { CarCategory, type VendorCar } from '../src/vendor';
-import type { UserProfile } from '../src/schemas';
+import type { UserProfile } from '../src/types';
 
 const BASE_YEAR = 2024;
 

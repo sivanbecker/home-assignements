@@ -6,7 +6,7 @@ import {
   DriverTooYoungError,
   EmptyCarSelectionError,
 } from '../src/errors';
-import type { QuoteRequest } from '../src/schemas';
+import type { QuoteRequest } from '../src/types';
 
 const CURRENT_YEAR = 2024;
 
