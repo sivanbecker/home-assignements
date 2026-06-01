@@ -28,7 +28,7 @@ export const categoryFactor: RiskFactor = (_profile, car) => {
   return 1.0;
 };
 
-export const RISK_FACTORS: RiskFactor[] = [ageFactor, seniorityFactor, categoryFactor];
+export const RISK_FACTORS: readonly RiskFactor[] = [ageFactor, seniorityFactor, categoryFactor];
 
 export function calculatePremium(
   profile: UserProfile,
@@ -48,7 +48,7 @@ export const categoryRule: InsurabilityRule = (car) =>
 export const valueRule: InsurabilityRule = (car) =>
   car.value >= MAX_INSURABLE_VALUE ? `value must be under ${MAX_INSURABLE_VALUE}` : null;
 
-export const INSURABILITY_RULES: InsurabilityRule[] = [yearRule, categoryRule, valueRule];
+export const INSURABILITY_RULES: readonly InsurabilityRule[] = [yearRule, categoryRule, valueRule];
 
 export function getInsurabilityFailures(car: VendorCar): string[] {
   return INSURABILITY_RULES.map((r) => r(car)).filter((r): r is string => r !== null);
