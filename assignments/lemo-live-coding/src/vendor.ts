@@ -25,7 +25,11 @@ const VENDOR_CARS: VendorCar[] = [
   { id: 'car-5', userId: 'user-2', make: 'Nissan', model: 'Altima', year: 2005, category: CarCategory.Sedan, value: 8000 },
 ];
 
-const KNOWN_USER_IDS = new Set(['user-1', 'user-2', 'user-empty']);
+// Users who exist in the system but may have no cars registered
+const USERS_WITH_NO_CARS = ['user-empty'];
+
+// Derived so adding a car for a new user automatically registers them
+const KNOWN_USER_IDS = new Set([...VENDOR_CARS.map((c) => c.userId), ...USERS_WITH_NO_CARS]);
 
 export function getCarsForUser(userId: string): VendorCar[] {
   if (!KNOWN_USER_IDS.has(userId)) {

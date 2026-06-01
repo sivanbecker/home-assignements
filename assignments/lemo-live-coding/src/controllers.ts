@@ -1,6 +1,6 @@
 import type { PostLemoBody, PostLemoResponse, InsurableCar, QuoteRequest, QuoteResult } from './schemas';
 import { getCarsForUser } from './vendor';
-import { calculatePremium, isInsurable, getInsurabilityFailures } from './pricing';
+import { calculatePremium, isInsurable, getInsurabilityFailures, MULTI_CAR_MIN_COUNT, MULTI_CAR_DISCOUNT_FACTOR } from './pricing';
 import {
   DriverTooYoungError,
   EmptyCarSelectionError,
@@ -45,7 +45,7 @@ export function postQuote(req: QuoteRequest, currentYear: number = new Date().ge
   }));
 
   const total = quotes.reduce((sum, q) => sum + q.premium, 0);
-  const combinedPremium = Math.round(quotes.length >= 2 ? total * 0.95 : total);
+  const combinedPremium = Math.round(quotes.length >= MULTI_CAR_MIN_COUNT ? total * MULTI_CAR_DISCOUNT_FACTOR : total);
 
   return { quotes, combinedPremium };
 }
