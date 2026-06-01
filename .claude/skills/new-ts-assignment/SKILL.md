@@ -64,9 +64,17 @@ This skill automates the setup and guides you through the complete TDD-driven Ty
 - Only propose deviations when the assignment text clearly justifies it
 - Document the rationale briefly
 
-**Output:** `docs/DECISIONS.md` — at most 8 short bullet points summarizing chosen options and rationale (readable in under 2 minutes)
+**Output:**
+- `docs/DECISIONS.md` — at most 8 short bullet points summarizing chosen options and rationale (readable in under 2 minutes)
+- `docs/TRADEOFFS.md` — stub created here with one entry per decision in `DECISIONS.md`. Format per entry:
+  ```
+  ## <Decision Name>
+  **Choice:** <what was chosen>
+  **Tradeoff:** <what you gain> vs. <what you give up>
+  **Why here:** <one sentence on why this choice fits this assignment>
+  ```
 
-**Stop point:** After writing `docs/DECISIONS.md`, stop and wait for user review before proceeding to Design phase
+**Stop point:** After writing `docs/DECISIONS.md` and `docs/TRADEOFFS.md`, stop and wait for user review before proceeding to Design phase
 
 ### Phase 3: Design (Tiny, Executable Design — under 3 minutes to read)
 
@@ -158,7 +166,9 @@ This skill automates the setup and guides you through the complete TDD-driven Ty
    - Keep to max 12 nodes per diagram
    - These diagrams are the primary review artifact at the Design stop point
 
-**Stop point:** Present the design doc including all three Mermaid diagrams. Wait for user approval before writing tests.
+**Append to `docs/TRADEOFFS.md`** — for each significant design decision made during this phase (module split, data flow choices, interface shape), add a new entry using the same format established in Phase 2.
+
+**Stop point:** Present the design doc including all three Mermaid diagrams and the updated `TRADEOFFS.md`. Wait for user approval before writing tests.
 
 ### Phase 4: TDD Execution — Pattern-Based Review at Every Stop
 
@@ -236,12 +246,22 @@ Next describe block or test file, using the implementation checklist from `docs/
 
 **For large assignments:** Show progress summary after each module/class is complete (which checklist items are done, which remain).
 
-### Phase 5: Debrief
+### Phase 5: Post-Implementation Docs + Debrief
 
-Produce `docs/DEBRIEF.md`:
+**Step 1: Run `/ts-code-viewer`** — Before writing the debrief, run `/ts-code-viewer` to generate the three post-implementation docs:
+- `docs/ARCHITECTURE.md` — module-level diagrams (layered architecture, actual import graph, risk map)
+- `docs/INTERNALS.md` — class diagram, call-flow diagrams, review slices
+- `docs/REVIEW.md` — architectural review findings (priorities, risks, refactor suggestions)
+
+**Step 2: Finalize `docs/TRADEOFFS.md`** — Add a closing `## Summary` section at the bottom:
+```
+## Summary
+List the 2–3 tradeoffs that had the biggest impact on the final design, and whether you'd make the same call again.
+```
+
+**Step 3: Produce `docs/DEBRIEF.md`**:
 - Per-module explanation of what was built and why
 - Patterns used (factory, builder, composition, etc.)
-- Tradeoffs made (readability vs performance, extensibility vs simplicity)
 - What you'd change with more time
 - Lessons learned
 
@@ -267,6 +287,7 @@ Then follow the prompts. The skill will:
   - `docs/INTAKE.md` — Requirements and constraints
   - `docs/QUESTIONS.md` — Clarifying questions for user input
   - `docs/DECISIONS.md` — Confirmed technical choices
+  - `docs/TRADEOFFS.md` — Living tradeoff log: one entry per key decision, grows through Standards → Design → Debrief
   - `docs/DESIGN.md` — Architecture, design, and **pre-implementation Mermaid diagrams**
   - `docs/ARCHITECTURE.md` — Post-implementation module graph diagrams (written by `/ts-code-viewer`)
   - `docs/INTERNALS.md` — Post-implementation class, call-flow, and slice diagrams (written by `/ts-code-viewer`)
@@ -297,6 +318,7 @@ assignments/
     │   ├── INTAKE.md           # Requirements, constraints, edge cases
     │   ├── QUESTIONS.md        # Clarifying questions (user fills in answers)
     │   ├── DECISIONS.md        # Confirmed technical decisions
+    │   ├── TRADEOFFS.md        # Living tradeoff log (Standards → Design → Debrief)
     │   ├── DESIGN.md           # Architecture, design + pre-impl Mermaid diagrams
     │   ├── ARCHITECTURE.md     # Post-impl module graph (written by /ts-code-viewer)
     │   ├── INTERNALS.md        # Post-impl class/callflow/slices (/ts-code-viewer)
