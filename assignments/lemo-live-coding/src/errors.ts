@@ -34,7 +34,7 @@ export class EmptyCarSelectionError extends Error {
 }
 
 export class QuoteError extends Error {
-  statusCode: 400;
+  readonly statusCode = 400 as const;
   constructor(message: string) {
     super(message);
     this.name = 'QuoteError';

@@ -23,8 +23,11 @@ export async function getCarsHandler(
   try {
     const cars = getCars(request.query.userId);
     reply.send(cars);
-  } catch (err) {
-    throw new QuoteError((err as Error).message);
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      throw new QuoteError(err.message);
+    }
+    throw new QuoteError('Unknown error');
   }
 }
 
@@ -35,7 +38,10 @@ export async function postQuoteHandler(
   try {
     const result = postQuote(request.body);
     reply.send(result);
-  } catch (err) {
-    throw new QuoteError((err as Error).message);
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      throw new QuoteError(err.message);
+    }
+    throw new QuoteError('Unknown error');
   }
 }

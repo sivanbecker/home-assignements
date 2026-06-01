@@ -6,8 +6,8 @@ export interface UserProfile {
   readonly zipCode: string;
 }
 
-type RiskFactor = (profile: UserProfile, car: VendorCar, currentYear: number) => number;
-type InsurabilityRule = (car: VendorCar) => string | null;
+export type RiskFactor = (profile: UserProfile, car: VendorCar, currentYear: number) => number;
+export type InsurabilityRule = (car: VendorCar) => string | null;
 
 export const ageFactor: RiskFactor = (profile) => (profile.age < 25 ? 1.3 : 1.0);
 
@@ -43,7 +43,8 @@ export const valueRule: InsurabilityRule = (car) =>
 export const INSURABILITY_RULES: InsurabilityRule[] = [yearRule, categoryRule, valueRule];
 
 export function getInsurabilityFailures(car: VendorCar): string[] {
-  return INSURABILITY_RULES.map((r) => r(car)).filter(Boolean) as string[];
+  return INSURABILITY_RULES.map((r) => r(car)).filter((r): r is string => r !== null);
+
 }
 
 export function isInsurable(car: VendorCar): boolean {
