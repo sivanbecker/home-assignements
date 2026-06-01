@@ -69,6 +69,8 @@ This skill automates the setup and guides you through the complete TDD-driven Py
 
 ### Phase 3: Design (Tiny, Executable Design — under 3 minutes to read)
 
+**Step 0: Map the existing codebase** — Before designing anything, generate a Mermaid diagram of the current source tree (use the `internal-class-diagram` or `internal-callflow-diagram` skill if available, otherwise produce a `flowchart TD` manually from the file list). Present it in chat so both parties have a shared visual of what already exists. Use it as the anchor when deciding where new modules slot in and which existing files need to be extended.
+
 **Size constraints:**
 - Maximum 3 modules
 - Maximum 5 total functions/classes
