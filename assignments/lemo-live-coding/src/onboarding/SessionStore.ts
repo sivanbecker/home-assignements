@@ -1,7 +1,14 @@
 import { randomUUID } from 'crypto';
-import { SessionNotFoundError, SessionExpiredError } from './errors';
+import { SessionNotFoundError, SessionExpiredError, StepOrderError } from './errors';
 import type { Session } from './types';
 import { SessionStep } from './types';
+
+const STEP_ORDER: SessionStep[] = [
+  SessionStep.STARTED,
+  SessionStep.PROFILED,
+  SessionStep.QUOTED,
+  SessionStep.BOUND,
+];
 
 const DEFAULT_TTL_MS = 30 * 60 * 1000;
 
@@ -43,6 +50,9 @@ export class SessionStore {
   advanceStep(sessionId: string, step: SessionStep): Session {
     const session = this.sessions.get(sessionId);
     if (!session) throw new SessionNotFoundError(sessionId);
+    if (STEP_ORDER.indexOf(step) <= STEP_ORDER.indexOf(session.step)) {
+      throw new StepOrderError(`Cannot advance from ${session.step} to ${step}`);
+    }
     const updated = { ...session, step };
     this.sessions.set(sessionId, updated);
     return updated;
