@@ -20,47 +20,48 @@ describe('CarCountFactor', () => {
   describe('happy path', () => {
     it('should return 1.0 multiplier for a single car', () => {
       const session = { ...BASE_SESSION, selectedCarIds: ['car-1'] };
-      expect(factor.apply(session)).toBe(1.0);
+      expect(factor.applyToTotal(session)).toBe(1.0);
     });
 
     it('should return 0.95 multiplier for two or more cars', () => {
       const session = { ...BASE_SESSION, selectedCarIds: ['car-1', 'car-2'] };
-      expect(factor.apply(session)).toBe(0.95);
+      expect(factor.applyToTotal(session)).toBe(0.95);
     });
   });
 
   describe('edge cases', () => {
     it('should return 1.0 multiplier for empty selection', () => {
       const session = { ...BASE_SESSION, selectedCarIds: [] };
-      expect(factor.apply(session)).toBe(1.0);
+      expect(factor.applyToTotal(session)).toBe(1.0);
     });
   });
 });
 
 describe('AgeFactor', () => {
   const factor = new AgeFactor();
+  const anyCar = BASE_SESSION.eligibleCars![0];
 
   describe('happy path', () => {
     it('should return 1.0 multiplier for age 25 or older', () => {
       const session = { ...BASE_SESSION, profile: { ...BASE_SESSION.profile!, age: 25 } };
-      expect(factor.apply(session)).toBe(1.0);
+      expect(factor.apply(session, anyCar)).toBe(1.0);
     });
 
     it('should return 1.3 multiplier for age under 25', () => {
       const session = { ...BASE_SESSION, profile: { ...BASE_SESSION.profile!, age: 24 } };
-      expect(factor.apply(session)).toBe(1.3);
+      expect(factor.apply(session, anyCar)).toBe(1.3);
     });
   });
 
   describe('edge cases', () => {
     it('should return 1.0 multiplier for exactly age 25', () => {
       const session = { ...BASE_SESSION, profile: { ...BASE_SESSION.profile!, age: 25 } };
-      expect(factor.apply(session)).toBe(1.0);
+      expect(factor.apply(session, anyCar)).toBe(1.0);
     });
 
     it('should return 1.3 multiplier for age 0', () => {
       const session = { ...BASE_SESSION, profile: { ...BASE_SESSION.profile!, age: 0 } };
-      expect(factor.apply(session)).toBe(1.3);
+      expect(factor.apply(session, anyCar)).toBe(1.3);
     });
   });
 });

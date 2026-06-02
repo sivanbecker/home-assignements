@@ -1,25 +1,42 @@
-import type { Session, Quote } from './types';
+import type { Session, Quote, CarOption } from './types';
 
 const BASE_PREMIUM = 1000;
+const YOUNG_DRIVER_AGE_THRESHOLD = 25;
+const YOUNG_DRIVER_MULTIPLIER = 1.3;
+const MULTI_CAR_THRESHOLD = 2;
+const MULTI_CAR_DISCOUNT = 0.95;
 
 export interface PricingFactor {
-  apply(session: Session): number;
+  apply(session: Session, car: CarOption): number;
+}
+
+// reads session.profile — car argument is ignored
+export interface ProfilePricingFactor extends PricingFactor {}
+
+// reads the specific car being priced — profile may be ignored
+export interface CarPricingFactor extends PricingFactor {}
+
+// applies to the total after all per-car premiums are summed (e.g. multi-car discount)
+export interface TotalPricingFactor {
+  applyToTotal(session: Session): number;
 }
 
 export interface QuoteFactors {
   perCarFactors: PricingFactor[];
-  totalFactors: PricingFactor[];
+  totalFactors: TotalPricingFactor[];
 }
 
-export class CarCountFactor implements PricingFactor {
-  apply(session: Session): number {
-    return (session.selectedCarIds?.length ?? 0) >= 2 ? 0.95 : 1.0;
+export class AgeFactor implements ProfilePricingFactor {
+  apply(session: Session, _car: CarOption): number {
+    return (session.profile?.age ?? YOUNG_DRIVER_AGE_THRESHOLD) < YOUNG_DRIVER_AGE_THRESHOLD
+      ? YOUNG_DRIVER_MULTIPLIER
+      : 1.0;
   }
 }
 
-export class AgeFactor implements PricingFactor {
-  apply(session: Session): number {
-    return (session.profile?.age ?? 25) < 25 ? 1.3 : 1.0;
+export class CarCountFactor implements TotalPricingFactor {
+  applyToTotal(session: Session): number {
+    return (session.selectedCarIds?.length ?? 0) >= MULTI_CAR_THRESHOLD ? MULTI_CAR_DISCOUNT : 1.0;
   }
 }
 
@@ -28,22 +45,25 @@ export class QuoteEngine {
 
   calculate(session: Session): Quote {
     const selectedCarIds = session.selectedCarIds ?? [];
-
-    const perCarMultiplier = this.factors.perCarFactors.reduce(
-      (acc, f) => acc * f.apply(session),
-      1,
-    );
+    const eligibleCars = session.eligibleCars ?? [];
 
     const perCar: Record<string, number> = {};
     let subtotal = 0;
+
     for (const carId of selectedCarIds) {
-      const premium = Math.round(BASE_PREMIUM * perCarMultiplier);
-      perCar[carId] = premium;
-      subtotal += premium;
+      const car = eligibleCars.find((c) => c.carId === carId);
+      if (!car) continue;
+
+      const premium = this.factors.perCarFactors.reduce(
+        (acc, f) => acc * f.apply(session, car),
+        BASE_PREMIUM,
+      );
+      perCar[carId] = Math.round(premium);
+      subtotal += perCar[carId];
     }
 
     const totalMultiplier = this.factors.totalFactors.reduce(
-      (acc, f) => acc * f.apply(session),
+      (acc, f) => acc * f.applyToTotal(session),
       1,
     );
 
