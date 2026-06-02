@@ -299,7 +299,13 @@ Next describe block or test file, using the implementation checklist from `docs/
 - `docs/INTERNALS.md` — class diagram, call-flow diagrams, review slices
 - `docs/REVIEW.md` — architectural review findings (priorities, risks, refactor suggestions)
 
-**Step 2: Finalize `docs/TRADEOFFS.md`** — Add a closing `## Summary` section at the bottom:
+**Step 2: Run `/ts-interviewer-review`** — Full 9-dimension production-grade code review of the implementation. Output is presented in chat (not written to a file). Review findings inform the debrief and highlight gaps to fix before a real interview submission.
+
+**Step 3: Run `/ts-tests-scanner`** — Deep evaluation of the test suite across 5 dimensions including scale coverage. Output is presented in chat. Use findings to decide whether any tests need to be added or refactored before closing out.
+
+**Stop point:** After all three tools have run, present a consolidated summary of the top 3 findings from each tool (9 findings total, ranked by severity). Ask: "Fix any of these before writing the debrief, or proceed?"
+
+**Step 4: Finalize `docs/TRADEOFFS.md`** — Add a closing `## Summary` section at the bottom:
 ```
 ## Summary
 List the 2–3 tradeoffs that had the biggest impact on the final design, and whether you'd make the same call again.
@@ -308,7 +314,7 @@ List the 2–3 tradeoffs that had the biggest impact on the final design, and wh
 For each row in the Design scaling analysis: did the implementation stay honest to its stated limits? If any limit was breached silently (e.g., unbounded in-memory growth, O(N²) slipped in), flag it here.
 ```
 
-**Step 3: Produce `docs/DEBRIEF.md`**:
+**Step 5: Produce `docs/DEBRIEF.md`**:
 - Per-module explanation of what was built and why
 - Patterns used (factory, builder, composition, etc.)
 - What you'd change with more time
