@@ -1,9 +1,10 @@
 import type { FastifyInstance, FastifyError } from 'fastify';
+import { WebError } from './WebError';
 
 export function registerErrorHandler(app: FastifyInstance): void {
-  app.setErrorHandler((error: FastifyError, _request, reply) => {
+  app.setErrorHandler((error: FastifyError | WebError, _request, reply) => {
     app.log.error(error);
-    const statusCode = error.statusCode ?? 500;
+    const statusCode = error instanceof WebError ? error.statusCode : (error.statusCode ?? 500);
     reply.status(statusCode).send({
       statusCode,
       error: error.name,
