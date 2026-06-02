@@ -68,15 +68,15 @@ describe('AgeFactor', () => {
 describe('QuoteEngine', () => {
   describe('happy path', () => {
     it('should return a per-car premium of base 1000 with no factors', () => {
-      const engine = new QuoteEngine([]);
+      const engine = new QuoteEngine({ perCarFactors: [], totalFactors: [] });
       const session = { ...BASE_SESSION, selectedCarIds: ['car-1'] };
       const quote = engine.calculate(session);
       expect(quote.perCar['car-1']).toBe(1000);
       expect(quote.total).toBe(1000);
     });
 
-    it('should apply AgeFactor multiplier to each car premium', () => {
-      const engine = new QuoteEngine([new AgeFactor()]);
+    it('should apply perCarFactors multiplier to each car premium', () => {
+      const engine = new QuoteEngine({ perCarFactors: [new AgeFactor()], totalFactors: [] });
       const session = {
         ...BASE_SESSION,
         profile: { ...BASE_SESSION.profile!, age: 24 },
@@ -87,8 +87,8 @@ describe('QuoteEngine', () => {
       expect(quote.total).toBe(1300);
     });
 
-    it('should apply CarCountFactor discount to total for multiple cars', () => {
-      const engine = new QuoteEngine([new CarCountFactor()]);
+    it('should apply totalFactors discount to the total', () => {
+      const engine = new QuoteEngine({ perCarFactors: [], totalFactors: [new CarCountFactor()] });
       const session = { ...BASE_SESSION, selectedCarIds: ['car-1', 'car-2'] };
       const quote = engine.calculate(session);
       expect(quote.perCar['car-1']).toBe(1000);
@@ -96,8 +96,8 @@ describe('QuoteEngine', () => {
       expect(quote.total).toBe(Math.round(2000 * 0.95));
     });
 
-    it('should compose multiple factors and round to nearest integer', () => {
-      const engine = new QuoteEngine([new AgeFactor(), new CarCountFactor()]);
+    it('should compose perCarFactors and totalFactors and round to nearest integer', () => {
+      const engine = new QuoteEngine({ perCarFactors: [new AgeFactor()], totalFactors: [new CarCountFactor()] });
       const session = {
         ...BASE_SESSION,
         profile: { ...BASE_SESSION.profile!, age: 24 },
@@ -112,7 +112,7 @@ describe('QuoteEngine', () => {
 
   describe('edge cases', () => {
     it('should return zero total for empty car selection', () => {
-      const engine = new QuoteEngine([new AgeFactor(), new CarCountFactor()]);
+      const engine = new QuoteEngine({ perCarFactors: [new AgeFactor()], totalFactors: [new CarCountFactor()] });
       const session = { ...BASE_SESSION, selectedCarIds: [] };
       const quote = engine.calculate(session);
       expect(quote.total).toBe(0);
