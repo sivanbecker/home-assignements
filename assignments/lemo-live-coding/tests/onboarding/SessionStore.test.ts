@@ -55,25 +55,49 @@ describe('SessionStore', () => {
   });
 
   describe('update', () => {
-    it('should apply a patch to the session and return updated session', () => {
+    it('should apply a data patch to the session and return updated session', () => {
       const store = new SessionStore();
       const session = store.create();
-      const updated = store.update(session.sessionId, { step: SessionStep.PROFILED });
-      expect(updated.step).toBe(SessionStep.PROFILED);
+      const profile = { age: 30, licenseYear: 2015, zipCode: '10001' };
+      const updated = store.update(session.sessionId, { profile });
+      expect(updated.profile).toEqual(profile);
     });
 
     it('should throw SessionNotFoundError when updating a nonexistent session', () => {
       const store = new SessionStore();
-      expect(() => store.update('nonexistent', { step: SessionStep.PROFILED })).toThrow(SessionNotFoundError);
+      expect(() => store.update('nonexistent', { profile: { age: 30, licenseYear: 2015, zipCode: '10001' } })).toThrow(SessionNotFoundError);
     });
 
-    it('should not mutate other fields when patching', () => {
+    it('should not mutate sessionId or createdAt when patching', () => {
       const store = new SessionStore();
       const session = store.create();
-      store.update(session.sessionId, { step: SessionStep.PROFILED });
+      store.update(session.sessionId, { profile: { age: 30, licenseYear: 2015, zipCode: '10001' } });
       const fetched = store.get(session.sessionId);
       expect(fetched.createdAt).toEqual(session.createdAt);
       expect(fetched.sessionId).toBe(session.sessionId);
+    });
+  });
+
+  describe('advanceStep', () => {
+    it('should advance the session step and return updated session', () => {
+      const store = new SessionStore();
+      const session = store.create();
+      const updated = store.advanceStep(session.sessionId, SessionStep.PROFILED);
+      expect(updated.step).toBe(SessionStep.PROFILED);
+    });
+
+    it('should throw SessionNotFoundError when advancing step on nonexistent session', () => {
+      const store = new SessionStore();
+      expect(() => store.advanceStep('nonexistent', SessionStep.PROFILED)).toThrow(SessionNotFoundError);
+    });
+
+    it('should not allow patching sessionId or createdAt via advanceStep', () => {
+      const store = new SessionStore();
+      const session = store.create();
+      store.advanceStep(session.sessionId, SessionStep.PROFILED);
+      const fetched = store.get(session.sessionId);
+      expect(fetched.sessionId).toBe(session.sessionId);
+      expect(fetched.createdAt).toEqual(session.createdAt);
     });
   });
 
