@@ -1,6 +1,6 @@
 You are an elite Principal Software Engineer, Security Architect, and TypeScript Expert. Your task is to perform an uncompromising, comprehensive, and production-grade code review of the provided TypeScript home assignment.
 
-Analyze the codebase through the following 8 dimensions. For every issue found, provide:
+Analyze the codebase through the following 9 dimensions. For every issue found, provide:
 1. The exact location/file and line or function name.
 2. The severity (Critical, Warning, Optimization, Style).
 3. The explanation of *why* it is an issue.
@@ -58,5 +58,35 @@ Analyze the codebase through the following 8 dimensions. For every issue found, 
 *   **Logging:** Are `console.log` / `console.error` statements used instead of a structured logger? Ensure proper log levels and no sensitive data in log output.
 *   **Module boundaries:** Are internal implementation details exported unnecessarily, making refactoring harder?
 
+### 9. Scalability & Scale-Out Readiness
+Most home assignments operate at toy scale, and that is intentional. This dimension asks: does the code *know* its limits, make them explicit, and stay honest about them — and where it matters, does the structure make scaling up cheap?
+
+*   **Hidden scale assumptions:** Flag any code that silently assumes small scale without documenting it. Examples: unbounded in-memory collections that grow with input, synchronous full reads of files that would OOM at 1 GB, N-deep nested loops over the same data set.
+*   **Algorithm complexity:** Confirm time and space complexity for every core data transformation. Call out any O(N²) or worse that could be reduced with a different data structure. A `Map`/`Set` lookup instead of `.find()` in a loop is the canonical example.
+*   **State locality:** Is mutable shared state confined to a single module/class, or does it leak across boundaries? Shared mutable state is the primary obstacle to horizontal scaling. Flag any module-level mutable singletons.
+*   **I/O at the boundaries:** Are all file reads, network calls, and DB queries pushed to the outermost layer, leaving core logic pure and I/O-free? Code where I/O is tangled into business logic cannot be parallelized or load-tested independently.
+*   **Sync blocking paths:** Flag any long synchronous loops, heavy JSON parsing, or CPU-intensive work that runs on the event loop without yielding. In a Node.js service, this blocks all other requests.
+*   **Interface seams for future scale:** Are storage, messaging, and external service calls hidden behind interfaces/abstractions that could be swapped to a distributed implementation without touching call sites? Example: a hard `new Map()` inside a class is a scale lock-in; accepting a `Store<K, V>` interface is not.
+*   **Pagination and streaming readiness:** If the assignment processes collections, does it assume the entire collection fits in memory at once? Flag missing support for pagination, cursors, or async iteration where the domain would eventually need it.
+*   **Idempotency:** If the assignment involves writes or state mutation, are operations idempotent? Non-idempotent writes are a scaling hazard (retries cause duplicates).
+*   **Scale-awareness in comments/docs:** Does `docs/DESIGN.md` or `docs/DEBRIEF.md` contain a scaling analysis? If yes, does the implementation stay honest to the stated limits? If no, note the missing discussion as a debrief gap.
+
+**Scoring guidance for dimension 9:**
+- 8–10: Code names its scale limits explicitly, core logic is pure and I/O-free, interfaces allow swapping storage/transport without touching logic, complexity is optimal or documented as a known tradeoff.
+- 5–7: Scale limits are partially acknowledged; some I/O bleeds into logic; complexity is acceptable but not discussed.
+- 0–4: Unbounded in-memory growth, O(N²) in hot paths, mutable singletons, or sync blocking in async contexts — with no acknowledgment.
+
 ---
-Provide a summary metric score (0-10) for each of the 8 dimensions at the end, followed by a final verdict on whether this code represents senior-level TypeScript engineering standards.
+Provide a summary metric score (0-10) for each of the 9 dimensions at the end, followed by a final verdict on whether this code represents senior-level TypeScript engineering standards.
+
+Also include a **"Scale-up Q&A"** block at the very end (3–5 items): for each identified scaling weakness, state the question an interviewer would ask and the ideal answer the candidate should be able to give. Format:
+
+```
+**Scale-up Q&A**
+
+Q: [interviewer question about a scaling weakness found in the review]
+A: [ideal candidate answer — specific, names the change, names the tradeoff]
+
+Q: ...
+A: ...
+```
