@@ -32,10 +32,18 @@ export class SessionStore {
     return session;
   }
 
-  update(sessionId: string, patch: Partial<Session>): Session {
+  update(sessionId: string, patch: Omit<Partial<Session>, 'sessionId' | 'createdAt' | 'step'>): Session {
     const session = this.sessions.get(sessionId);
     if (!session) throw new SessionNotFoundError(sessionId);
     const updated = { ...session, ...patch };
+    this.sessions.set(sessionId, updated);
+    return updated;
+  }
+
+  advanceStep(sessionId: string, step: SessionStep): Session {
+    const session = this.sessions.get(sessionId);
+    if (!session) throw new SessionNotFoundError(sessionId);
+    const updated = { ...session, step };
     this.sessions.set(sessionId, updated);
     return updated;
   }
