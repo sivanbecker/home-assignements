@@ -75,7 +75,12 @@ The goal is **scale-aware, not over-engineered**. A three-line in-memory Map is 
 
 **Default Standards Profile (assume unless assignment clearly needs deviation):**
 - **Input validation:** Manual type guards or small Zod schemas (not heavy class-based validation unless complex structured data)
-- **Error handling:** Throw typed errors (`class DomainError extends Error`) for unexpected failures; return `null` or a discriminated union for expected failures
+- **Error handling:** Three-layer pattern:
+  1. **Domain errors** — typed `class XError extends Error { readonly name = 'XError' as const }` with no HTTP knowledge; exported as a discriminated union: `type DomainError = NotFoundError | ExpiredError | ...`; also export an `isDomainError(e: unknown): e is DomainError` type guard (needed because catch blocks give `unknown`)
+  2. **HTTP error** — one `XxxWebError extends WebError` per assignment (e.g. `OnboardingWebError`); handlers throw this, never domain errors directly
+  3. **Handler mapping** — one `mapDomainError(error: DomainError): never` using an exhaustive `switch (error.name)` + `assertNever` at the `default` branch; handlers call `if (isDomainError(error)) mapDomainError(error); throw error;`
+  - **Why not `instanceof` chain:** not exhaustive — adding a new domain error silently falls through to a re-throw → 500 with no compiler warning
+  - **Tradeoff:** requires maintaining the union type + type guard + switch in sync (3 places vs 1); for ≤5 domain errors at interview scale the `instanceof` chain is simpler — but the exhaustive pattern is the correct production answer and worth being able to explain
 - **Data modeling:** Plain interfaces or small `type` aliases; use `readonly` arrays and properties where data shouldn't be mutated
 - **Async vs sync:** Synchronous only, unless the assignment explicitly involves I/O, timers, or external APIs
 - **Testing pattern:** Plain `describe`/`it` blocks with `expect`; use `test.each` only when it clearly improves readability
@@ -256,7 +261,7 @@ If adding tests: generate only those tests, stop again for review. Otherwise, pr
 **2. Standards checklist** (mark each as "OK" or "Check"):
 - ✓ TypeScript strict mode — no `any`, no `as unknown`, no type assertions unless justified
 - ✓ All exported functions have explicit return types
-- ✓ Error handling consistent with `docs/DECISIONS.md`
+- ✓ Error handling consistent with `docs/DECISIONS.md` — domain errors mapped via exhaustive switch + `assertNever`, not a chain of `instanceof` checks
 - ✓ No unnecessary abstraction for this assignment's scale
 - ✓ Code behavior matches test descriptions (no hidden responsibilities)
 - ✓ **Scaling honesty** — if this component has a scale limit (per the Design scaling analysis), is the limit respected in code (no silent data truncation, no unbounded array growth without comment)?
