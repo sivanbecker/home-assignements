@@ -55,9 +55,8 @@ export function submitQuote(
 ): Session {
   const session = store.get(sessionId);
   requireStep(session, SessionStep.PROFILED);
-  store.update(sessionId, { selectedCarIds: body.carIds });
-  const updatedSession = store.get(sessionId);
-  const quote = engine.calculate(updatedSession);
+  const sessionWithCars = store.update(sessionId, { selectedCarIds: body.carIds });
+  const quote = engine.calculate(sessionWithCars);
   store.update(sessionId, { quote });
   return store.advanceStep(sessionId, SessionStep.QUOTED);
 }
