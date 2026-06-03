@@ -1,6 +1,6 @@
 import { SessionStore } from './SessionStore';
 import { QuoteEngine } from './QuoteEngine';
-import { StepOrderError } from './errors';
+import { StepAlreadyDoneError, StepPrerequisiteError } from './errors';
 import { SessionStep, type Session, type CarOption, type ProfileBody } from './types';
 import { getAllCars } from './carRepository';
 
@@ -15,12 +15,20 @@ function isEligible(car: CarOption): boolean {
   return car.year >= ELIGIBILITY_MIN_YEAR && car.value < ELIGIBILITY_MAX_VALUE;
 }
 
+const STEP_ORDER = [SessionStep.STARTED, SessionStep.PROFILED, SessionStep.QUOTED, SessionStep.BOUND];
+
 function requireStep(session: Session, expected: SessionStep): void {
-  if (session.step !== expected) {
-    throw new StepOrderError(
-      `Expected step ${expected} but session is at ${session.step}`,
+  if (session.step === expected) return;
+  const currentIdx = STEP_ORDER.indexOf(session.step);
+  const expectedIdx = STEP_ORDER.indexOf(expected);
+  if (currentIdx > expectedIdx) {
+    throw new StepAlreadyDoneError(
+      `Step ${expected} already completed — session is at ${session.step}`,
     );
   }
+  throw new StepPrerequisiteError(
+    `Expected step ${expected} but session is at ${session.step}`,
+  );
 }
 
 export function startSession(store: SessionStore): Session {

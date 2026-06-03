@@ -1,6 +1,6 @@
 import { SessionStore } from '../../src/onboarding/SessionStore';
 import { SessionStep } from '../../src/onboarding/types';
-import { SessionNotFoundError, SessionExpiredError, StepOrderError } from '../../src/onboarding/errors';
+import { SessionNotFoundError, SessionExpiredError, StepAlreadyDoneError } from '../../src/onboarding/errors';
 
 describe('SessionStore', () => {
   describe('create', () => {
@@ -100,19 +100,19 @@ describe('SessionStore', () => {
       expect(fetched.createdAt).toEqual(session.createdAt);
     });
 
-    it('should throw StepOrderError when advancing to a previous step', () => {
+    it('should throw StepAlreadyDoneError when advancing to a previous step', () => {
       const store = new SessionStore();
       const session = store.create();
       store.advanceStep(session.sessionId, SessionStep.PROFILED);
       store.advanceStep(session.sessionId, SessionStep.QUOTED);
-      expect(() => store.advanceStep(session.sessionId, SessionStep.PROFILED)).toThrow(StepOrderError);
+      expect(() => store.advanceStep(session.sessionId, SessionStep.PROFILED)).toThrow(StepAlreadyDoneError);
     });
 
-    it('should throw StepOrderError when advancing to the same step', () => {
+    it('should throw StepAlreadyDoneError when advancing to the same step', () => {
       const store = new SessionStore();
       const session = store.create();
       store.advanceStep(session.sessionId, SessionStep.PROFILED);
-      expect(() => store.advanceStep(session.sessionId, SessionStep.PROFILED)).toThrow(StepOrderError);
+      expect(() => store.advanceStep(session.sessionId, SessionStep.PROFILED)).toThrow(StepAlreadyDoneError);
     });
   });
 

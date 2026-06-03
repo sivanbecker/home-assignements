@@ -2,7 +2,7 @@ import { startSession, submitProfile, submitQuote, bindSession, getStatus } from
 import { SessionStore } from '../../src/onboarding/SessionStore';
 import { QuoteEngine, AgeFactor, CarCountFactor } from '../../src/onboarding/QuoteEngine';
 import { SessionStep } from '../../src/onboarding/types';
-import { StepOrderError, SessionNotFoundError } from '../../src/onboarding/errors';
+import { StepAlreadyDoneError, StepPrerequisiteError, SessionNotFoundError } from '../../src/onboarding/errors';
 
 const engine = new QuoteEngine({
   perCarFactors: [new AgeFactor()],
@@ -43,20 +43,20 @@ describe('submitProfile', () => {
   });
 
   describe('step order violations', () => {
-    it('should throw StepOrderError if called twice on same session', () => {
+    it('should throw StepAlreadyDoneError if called twice on same session', () => {
       const store = new SessionStore();
       const { sessionId } = startSession(store);
       submitProfile(store, sessionId, VALID_PROFILE);
-      expect(() => submitProfile(store, sessionId, VALID_PROFILE)).toThrow(StepOrderError);
+      expect(() => submitProfile(store, sessionId, VALID_PROFILE)).toThrow(StepAlreadyDoneError);
     });
 
-    it('should throw StepOrderError if session is already QUOTED', () => {
+    it('should throw StepAlreadyDoneError if session is already QUOTED', () => {
       const store = new SessionStore();
       const { sessionId } = startSession(store);
       const profiled = submitProfile(store, sessionId, VALID_PROFILE);
       const carId = profiled.eligibleCars![0].carId;
       submitQuote(store, engine, sessionId, { carIds: [carId] });
-      expect(() => submitProfile(store, sessionId, VALID_PROFILE)).toThrow(StepOrderError);
+      expect(() => submitProfile(store, sessionId, VALID_PROFILE)).toThrow(StepAlreadyDoneError);
     });
   });
 
@@ -83,19 +83,19 @@ describe('submitQuote', () => {
   });
 
   describe('step order violations', () => {
-    it('should throw StepOrderError if profile step was not completed', () => {
+    it('should throw StepPrerequisiteError if profile step was not completed', () => {
       const store = new SessionStore();
       const { sessionId } = startSession(store);
-      expect(() => submitQuote(store, engine, sessionId, { carIds: ['car-1'] })).toThrow(StepOrderError);
+      expect(() => submitQuote(store, engine, sessionId, { carIds: ['car-1'] })).toThrow(StepPrerequisiteError);
     });
 
-    it('should throw StepOrderError if called twice on same session', () => {
+    it('should throw StepAlreadyDoneError if called twice on same session', () => {
       const store = new SessionStore();
       const { sessionId } = startSession(store);
       const profiled = submitProfile(store, sessionId, VALID_PROFILE);
       const carId = profiled.eligibleCars![0].carId;
       submitQuote(store, engine, sessionId, { carIds: [carId] });
-      expect(() => submitQuote(store, engine, sessionId, { carIds: [carId] })).toThrow(StepOrderError);
+      expect(() => submitQuote(store, engine, sessionId, { carIds: [carId] })).toThrow(StepAlreadyDoneError);
     });
   });
 });
@@ -115,21 +115,21 @@ describe('bindSession', () => {
   });
 
   describe('step order violations', () => {
-    it('should throw StepOrderError if quote step was not completed', () => {
+    it('should throw StepPrerequisiteError if quote step was not completed', () => {
       const store = new SessionStore();
       const { sessionId } = startSession(store);
       submitProfile(store, sessionId, VALID_PROFILE);
-      expect(() => bindSession(store, sessionId)).toThrow(StepOrderError);
+      expect(() => bindSession(store, sessionId)).toThrow(StepPrerequisiteError);
     });
 
-    it('should throw StepOrderError if called twice on same session', () => {
+    it('should throw StepAlreadyDoneError if called twice on same session', () => {
       const store = new SessionStore();
       const { sessionId } = startSession(store);
       const profiled = submitProfile(store, sessionId, VALID_PROFILE);
       const carId = profiled.eligibleCars![0].carId;
       submitQuote(store, engine, sessionId, { carIds: [carId] });
       bindSession(store, sessionId);
-      expect(() => bindSession(store, sessionId)).toThrow(StepOrderError);
+      expect(() => bindSession(store, sessionId)).toThrow(StepAlreadyDoneError);
     });
   });
 });

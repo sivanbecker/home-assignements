@@ -1,5 +1,5 @@
 import { randomUUID } from 'crypto';
-import { SessionNotFoundError, SessionExpiredError, StepOrderError } from './errors';
+import { SessionNotFoundError, SessionExpiredError, StepAlreadyDoneError } from './errors';
 import type { Session } from './types';
 import { SessionStep } from './types';
 
@@ -51,7 +51,7 @@ export class SessionStore {
     const session = this.sessions.get(sessionId);
     if (!session) throw new SessionNotFoundError(sessionId);
     if (STEP_ORDER.indexOf(step) <= STEP_ORDER.indexOf(session.step)) {
-      throw new StepOrderError(`Cannot advance from ${session.step} to ${step}`);
+      throw new StepAlreadyDoneError(`Cannot advance from ${session.step} to ${step}`);
     }
     const updated = { ...session, step };
     this.sessions.set(sessionId, updated);

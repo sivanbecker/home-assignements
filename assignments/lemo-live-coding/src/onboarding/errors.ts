@@ -14,6 +14,23 @@ export class SessionExpiredError extends Error {
   }
 }
 
+// step already completed — client should start a new session (409)
+export class StepAlreadyDoneError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'StepAlreadyDoneError';
+  }
+}
+
+// prerequisite step not yet completed (422)
+export class StepPrerequisiteError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'StepPrerequisiteError';
+  }
+}
+
+// keep StepOrderError as a base alias for backwards compat with unit tests
 export class StepOrderError extends Error {
   constructor(message: string) {
     super(message);
