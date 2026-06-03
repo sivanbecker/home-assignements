@@ -75,7 +75,10 @@ The goal is **scale-aware, not over-engineered**. A three-line in-memory Map is 
 
 **Default Standards Profile (assume unless assignment clearly needs deviation):**
 - **Input validation:** Manual type guards or small Zod schemas (not heavy class-based validation unless complex structured data)
-- **Error handling:** Throw typed errors (`class DomainError extends Error`) for unexpected failures; return `null` or a discriminated union for expected failures
+- **Error handling:** Three-layer pattern:
+  1. **Domain errors** — typed `class XError extends Error {}` with no HTTP knowledge; exported as a discriminated union type: `type DomainError = NotFoundError | ExpiredError | StepOrderError | ...`
+  2. **HTTP error** — one `XxxWebError extends WebError` per assignment (e.g. `OnboardingWebError`); handlers throw this, never domain errors directly
+  3. **Handler mapping** — one `mapDomainError(error: DomainError): never` function using an exhaustive `switch (error.constructor)` or `switch (error.name)` + `assertNever` so the compiler catches any unhandled domain error at build time; **do not use a chain of `instanceof` checks** (not exhaustive, silently misses new errors)
 - **Data modeling:** Plain interfaces or small `type` aliases; use `readonly` arrays and properties where data shouldn't be mutated
 - **Async vs sync:** Synchronous only, unless the assignment explicitly involves I/O, timers, or external APIs
 - **Testing pattern:** Plain `describe`/`it` blocks with `expect`; use `test.each` only when it clearly improves readability
@@ -256,7 +259,7 @@ If adding tests: generate only those tests, stop again for review. Otherwise, pr
 **2. Standards checklist** (mark each as "OK" or "Check"):
 - ✓ TypeScript strict mode — no `any`, no `as unknown`, no type assertions unless justified
 - ✓ All exported functions have explicit return types
-- ✓ Error handling consistent with `docs/DECISIONS.md`
+- ✓ Error handling consistent with `docs/DECISIONS.md` — domain errors mapped via exhaustive switch + `assertNever`, not a chain of `instanceof` checks
 - ✓ No unnecessary abstraction for this assignment's scale
 - ✓ Code behavior matches test descriptions (no hidden responsibilities)
 - ✓ **Scaling honesty** — if this component has a scale limit (per the Design scaling analysis), is the limit respected in code (no silent data truncation, no unbounded array growth without comment)?
