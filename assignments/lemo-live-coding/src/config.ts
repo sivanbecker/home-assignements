@@ -9,7 +9,7 @@ export interface Config {
 }
 
 export const config: Config = {
-  port: parseInt(process.env['PORT'] ?? '3000', 10),
+  port: parseInt(process.env['PORT'] ?? '3018', 10),
   host: process.env['HOST'] ?? '127.0.0.1',
   logLevel: process.env['LOG_LEVEL'] ?? 'info',
 };
