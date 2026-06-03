@@ -2,18 +2,11 @@ import { SessionStore } from './SessionStore';
 import { QuoteEngine } from './QuoteEngine';
 import { StepOrderError } from './errors';
 import { SessionStep, type Session, type CarOption, type ProfileBody } from './types';
+import { getAllCars } from './carRepository';
 
 export interface QuoteBody {
   carIds: string[];
 }
-
-const CAR_CATALOGUE: CarOption[] = [
-  { carId: 'car-1', make: 'Toyota', model: 'Camry', year: 2018, value: 20000 },
-  { carId: 'car-2', make: 'Honda', model: 'Civic', year: 2020, value: 18000 },
-  { carId: 'car-3', make: 'Ford', model: 'Mustang', year: 2019, value: 45000 },
-  { carId: 'car-4', make: 'Ferrari', model: '488', year: 2021, value: 280000 },
-  { carId: 'car-5', make: 'Toyota', model: 'Corolla', year: 2005, value: 8000 },
-];
 
 const ELIGIBILITY_MIN_YEAR = 2008;
 const ELIGIBILITY_MAX_VALUE = 150000;
@@ -41,7 +34,7 @@ export function submitProfile(
 ): Session {
   const session = store.get(sessionId);
   requireStep(session, SessionStep.STARTED);
-  const eligibleCars = CAR_CATALOGUE.filter(isEligible);
+  const eligibleCars = getAllCars().filter(isEligible);
   store.update(sessionId, { profile, eligibleCars });
   return store.advanceStep(sessionId, SessionStep.PROFILED);
 }
