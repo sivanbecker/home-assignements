@@ -3,4 +3,4 @@ dist/
 .env
 coverage/
 *.js.map
-docs/
+docs/prep/
