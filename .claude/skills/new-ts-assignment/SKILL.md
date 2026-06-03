@@ -76,9 +76,11 @@ The goal is **scale-aware, not over-engineered**. A three-line in-memory Map is 
 **Default Standards Profile (assume unless assignment clearly needs deviation):**
 - **Input validation:** Manual type guards or small Zod schemas (not heavy class-based validation unless complex structured data)
 - **Error handling:** Three-layer pattern:
-  1. **Domain errors** — typed `class XError extends Error {}` with no HTTP knowledge; exported as a discriminated union type: `type DomainError = NotFoundError | ExpiredError | StepOrderError | ...`
+  1. **Domain errors** — typed `class XError extends Error { readonly name = 'XError' as const }` with no HTTP knowledge; exported as a discriminated union: `type DomainError = NotFoundError | ExpiredError | ...`; also export an `isDomainError(e: unknown): e is DomainError` type guard (needed because catch blocks give `unknown`)
   2. **HTTP error** — one `XxxWebError extends WebError` per assignment (e.g. `OnboardingWebError`); handlers throw this, never domain errors directly
-  3. **Handler mapping** — one `mapDomainError(error: DomainError): never` function using an exhaustive `switch (error.constructor)` or `switch (error.name)` + `assertNever` so the compiler catches any unhandled domain error at build time; **do not use a chain of `instanceof` checks** (not exhaustive, silently misses new errors)
+  3. **Handler mapping** — one `mapDomainError(error: DomainError): never` using an exhaustive `switch (error.name)` + `assertNever` at the `default` branch; handlers call `if (isDomainError(error)) mapDomainError(error); throw error;`
+  - **Why not `instanceof` chain:** not exhaustive — adding a new domain error silently falls through to a re-throw → 500 with no compiler warning
+  - **Tradeoff:** requires maintaining the union type + type guard + switch in sync (3 places vs 1); for ≤5 domain errors at interview scale the `instanceof` chain is simpler — but the exhaustive pattern is the correct production answer and worth being able to explain
 - **Data modeling:** Plain interfaces or small `type` aliases; use `readonly` arrays and properties where data shouldn't be mutated
 - **Async vs sync:** Synchronous only, unless the assignment explicitly involves I/O, timers, or external APIs
 - **Testing pattern:** Plain `describe`/`it` blocks with `expect`; use `test.each` only when it clearly improves readability
