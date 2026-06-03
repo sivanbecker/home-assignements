@@ -301,7 +301,7 @@ Next describe block or test file, using the implementation checklist from `docs/
 - `docs/INTERNALS.md` — class diagram, call-flow diagrams, review slices
 - `docs/REVIEW.md` — architectural review findings (priorities, risks, refactor suggestions)
 
-**Step 2: Run `/ts-interviewer-review`** — Full 9-dimension production-grade code review of the implementation. Output is presented in chat (not written to a file). Review findings inform the debrief and highlight gaps to fix before a real interview submission.
+**Step 2: Run `/ts-interviewer-review`** — Full 9-dimension production-grade code review of the implementation. After presenting the review in chat, write the full output to `docs/INTERVIEWER_REVIEW.md` in the assignment folder. Review findings inform the debrief and highlight gaps to fix before a real interview submission.
 
 **Step 3: Run `/ts-tests-scanner`** — Deep evaluation of the test suite across 5 dimensions including scale coverage. Output is presented in chat. Use findings to decide whether any tests need to be added or refactored before closing out.
 
@@ -363,6 +363,7 @@ Then follow the prompts. The skill will:
   - `docs/ARCHITECTURE.md` — Post-implementation module graph diagrams (written by `/ts-code-viewer`)
   - `docs/INTERNALS.md` — Post-implementation class, call-flow, and slice diagrams (written by `/ts-code-viewer`)
   - `docs/REVIEW.md` — Architectural review findings (written by `/ts-code-viewer`)
+  - `docs/INTERVIEWER_REVIEW.md` — 9-dimension production-grade review (written by `/ts-interviewer-review`)
   - `docs/DEBRIEF.md` — Retrospective, learnings, and **scaling retrospective table**
 
 ## Important Notes
