@@ -1,12 +1,22 @@
 import type { FastifyInstance } from 'fastify';
 import { getLemoHandler, postLemoHandler } from './handlers';
 import { getLemoSchema, postLemoBodySchema } from './schemas';
-import { startHandler, profileHandler, quoteHandler, bindHandler, statusHandler } from './onboarding/handlers';
+import { makeOnboardingHandlers } from './onboarding/handlers';
 import { startSchema, profileSchema, quoteSchema, bindSchema, statusSchema } from './onboarding/schemas';
+import { SessionStore } from './onboarding/SessionStore';
+import { QuoteEngine, AgeFactor, CarCountFactor } from './onboarding/QuoteEngine';
 
 export function registerRoutes(app: FastifyInstance): void {
   app.get('/lemo', { schema: getLemoSchema }, getLemoHandler);
   app.post('/lemo', { schema: postLemoBodySchema }, postLemoHandler);
+
+  const store = new SessionStore();
+  const engine = new QuoteEngine({
+    perCarFactors: [new AgeFactor()],
+    totalFactors: [new CarCountFactor()],
+  });
+  const { startHandler, profileHandler, quoteHandler, bindHandler, statusHandler } =
+    makeOnboardingHandlers(store, engine);
 
   app.post('/onboarding/start', { schema: startSchema }, startHandler);
   app.post('/onboarding/:sessionId/profile', { schema: profileSchema }, profileHandler);
