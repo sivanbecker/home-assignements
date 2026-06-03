@@ -3,8 +3,13 @@ import { loggingOptions } from './plugins/logging';
 import { registerSwagger } from './plugins/swagger';
 import { registerErrorHandler } from './errors/errorHandler';
 import { registerRoutes } from './routes';
+import type { SessionStore } from './onboarding/SessionStore';
 
-export async function buildApp(): Promise<FastifyInstance> {
+export interface AppOptions {
+  store?: SessionStore;
+}
+
+export async function buildApp(options?: AppOptions): Promise<FastifyInstance> {
   const app = Fastify({
     logger: loggingOptions,
     requestIdHeader: 'x-request-id',
@@ -13,7 +18,7 @@ export async function buildApp(): Promise<FastifyInstance> {
 
   await registerSwagger(app);
   registerErrorHandler(app);
-  registerRoutes(app);
+  registerRoutes(app, options);
 
   return app;
 }
