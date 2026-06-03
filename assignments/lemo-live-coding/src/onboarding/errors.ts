@@ -30,14 +30,6 @@ export class StepPrerequisiteError extends Error {
   }
 }
 
-// keep StepOrderError as a base alias for backwards compat with unit tests
-export class StepOrderError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'StepOrderError';
-  }
-}
-
 export class OnboardingWebError extends WebError {
   constructor(statusCode: number, message: string) {
     super(statusCode, message);
