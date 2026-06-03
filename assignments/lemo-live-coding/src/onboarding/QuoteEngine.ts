@@ -47,11 +47,12 @@ export class QuoteEngine {
     const selectedCarIds = session.selectedCarIds ?? [];
     const eligibleCars = session.eligibleCars ?? [];
 
+    const eligibleCarMap = new Map(eligibleCars.map((c) => [c.carId, c]));
     const perCar: Record<string, number> = {};
     let subtotal = 0;
 
     for (const carId of selectedCarIds) {
-      const car = eligibleCars.find((c) => c.carId === carId);
+      const car = eligibleCarMap.get(carId);
       if (!car) continue;
 
       const premium = this.factors.perCarFactors.reduce(
