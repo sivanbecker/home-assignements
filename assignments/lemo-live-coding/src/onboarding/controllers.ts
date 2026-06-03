@@ -1,7 +1,7 @@
 import { SessionStore } from './SessionStore';
 import { QuoteEngine } from './QuoteEngine';
 import { StepAlreadyDoneError, StepPrerequisiteError } from './errors';
-import { SessionStep, type Session, type CarOption, type ProfileBody } from './types';
+import { SessionStep, STEP_ORDER, type Session, type CarOption, type ProfileBody } from './types';
 import { getAllCars } from './carRepository';
 
 export interface QuoteBody {
@@ -14,8 +14,6 @@ const ELIGIBILITY_MAX_VALUE = 150000;
 function isEligible(car: CarOption): boolean {
   return car.year >= ELIGIBILITY_MIN_YEAR && car.value < ELIGIBILITY_MAX_VALUE;
 }
-
-const STEP_ORDER = [SessionStep.STARTED, SessionStep.PROFILED, SessionStep.QUOTED, SessionStep.BOUND];
 
 function requireStep(session: Session, expected: SessionStep): void {
   if (session.step === expected) return;

@@ -5,6 +5,13 @@ export enum SessionStep {
   BOUND = 'BOUND',
 }
 
+export const STEP_ORDER: SessionStep[] = [
+  SessionStep.STARTED,
+  SessionStep.PROFILED,
+  SessionStep.QUOTED,
+  SessionStep.BOUND,
+];
+
 export interface CarOption {
   carId: string;
   make: string;

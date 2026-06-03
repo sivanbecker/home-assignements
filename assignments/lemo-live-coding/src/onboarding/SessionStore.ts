@@ -1,14 +1,7 @@
 import { randomUUID } from 'crypto';
 import { SessionNotFoundError, SessionExpiredError, StepAlreadyDoneError } from './errors';
 import type { Session } from './types';
-import { SessionStep } from './types';
-
-const STEP_ORDER: SessionStep[] = [
-  SessionStep.STARTED,
-  SessionStep.PROFILED,
-  SessionStep.QUOTED,
-  SessionStep.BOUND,
-];
+import { SessionStep, STEP_ORDER } from './types';
 
 const DEFAULT_TTL_MS = 30 * 60 * 1000;
 
