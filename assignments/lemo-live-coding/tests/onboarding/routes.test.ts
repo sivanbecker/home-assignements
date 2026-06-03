@@ -1,4 +1,5 @@
 import { buildApp } from '../../src/app';
+import { SessionStore } from '../../src/onboarding/SessionStore';
 import type { FastifyInstance } from 'fastify';
 
 describe('onboarding routes', () => {
@@ -97,12 +98,16 @@ describe('onboarding routes', () => {
       });
 
       it('should return 410 for expired session', async () => {
-        const startRes = await app.inject({ method: 'POST', url: '/onboarding/start' });
-        const { sessionId } = startRes.json();
-        // Simulate expiry by waiting — use a very short TTL app instance
-        // This is validated at unit level (SessionStore.test.ts); 410 path confirmed there.
-        // Integration-level TTL test would require a test-only buildApp({ ttlMs }) — nice-to-have.
-        expect(sessionId).toBeDefined(); // placeholder — TTL integration tested at unit level
+        const shortTtlApp = await buildApp({ store: new SessionStore({ ttlMs: 1 }) });
+        const { sessionId } = (await shortTtlApp.inject({ method: 'POST', url: '/onboarding/start' })).json();
+        await new Promise((r) => setTimeout(r, 10));
+        const res = await shortTtlApp.inject({
+          method: 'POST',
+          url: `/onboarding/${sessionId}/profile`,
+          payload: { age: 30, licenseYear: 2015, zipCode: '10001' },
+        });
+        expect(res.statusCode).toBe(410);
+        await shortTtlApp.close();
       });
     });
   });
@@ -139,6 +144,28 @@ describe('onboarding routes', () => {
           payload: { carIds: [carId] },
         });
         expect(res.statusCode).toBe(409);
+      });
+    });
+
+    describe('invalid input', () => {
+      it('should return 400 for empty carIds array', async () => {
+        const { sessionId } = await startAndProfile();
+        const res = await app.inject({
+          method: 'POST',
+          url: `/onboarding/${sessionId}/quote`,
+          payload: { carIds: [] },
+        });
+        expect(res.statusCode).toBe(400);
+      });
+
+      it('should return 422 for carIds not in eligible list', async () => {
+        const { sessionId } = await startAndProfile();
+        const res = await app.inject({
+          method: 'POST',
+          url: `/onboarding/${sessionId}/quote`,
+          payload: { carIds: ['car-4'] }, // Ferrari — ineligible (value > 150000)
+        });
+        expect(res.statusCode).toBe(422);
       });
     });
   });

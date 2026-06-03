@@ -5,12 +5,13 @@ import { makeOnboardingHandlers } from './onboarding/handlers';
 import { startSchema, profileSchema, quoteSchema, bindSchema, statusSchema } from './onboarding/schemas';
 import { SessionStore } from './onboarding/SessionStore';
 import { QuoteEngine, AgeFactor, CarCountFactor } from './onboarding/QuoteEngine';
+import type { AppOptions } from './app';
 
-export function registerRoutes(app: FastifyInstance): void {
+export function registerRoutes(app: FastifyInstance, options?: AppOptions): void {
   app.get('/lemo', { schema: getLemoSchema }, getLemoHandler);
   app.post('/lemo', { schema: postLemoBodySchema }, postLemoHandler);
 
-  const store = new SessionStore();
+  const store = options?.store ?? new SessionStore();
   const engine = new QuoteEngine({
     perCarFactors: [new AgeFactor()],
     totalFactors: [new CarCountFactor()],

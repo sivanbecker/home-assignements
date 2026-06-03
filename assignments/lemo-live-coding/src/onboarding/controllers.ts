@@ -53,6 +53,11 @@ export function submitQuote(
 ): Session {
   const session = store.get(sessionId);
   requireStep(session, SessionStep.PROFILED);
+  const eligibleIds = new Set(session.eligibleCars?.map((c) => c.carId) ?? []);
+  const invalidIds = body.carIds.filter((id) => !eligibleIds.has(id));
+  if (invalidIds.length > 0) {
+    throw new StepPrerequisiteError(`Car IDs not in eligible list: ${invalidIds.join(', ')}`);
+  }
   const sessionWithCars = { ...session, selectedCarIds: body.carIds };
   const quote = engine.calculate(sessionWithCars);
   store.update(sessionId, { selectedCarIds: body.carIds, quote });

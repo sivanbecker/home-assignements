@@ -120,4 +120,22 @@ describe('QuoteEngine', () => {
       expect(quote.perCar).toEqual({});
     });
   });
+
+  describe('scale', () => {
+    it('should calculate quote for 1000 selected cars within 100ms', () => {
+      const cars = Array.from({ length: 1000 }, (_, i) => ({
+        carId: `car-${i}`, make: 'Toyota', model: 'Camry', year: 2015, value: 20000,
+      }));
+      const session = {
+        ...BASE_SESSION,
+        eligibleCars: cars,
+        selectedCarIds: cars.map((c) => c.carId),
+      };
+      const engine = new QuoteEngine({ perCarFactors: [new AgeFactor()], totalFactors: [new CarCountFactor()] });
+      const start = Date.now();
+      const quote = engine.calculate(session);
+      expect(Date.now() - start).toBeLessThan(100);
+      expect(Object.keys(quote.perCar)).toHaveLength(1000);
+    });
+  });
 });
