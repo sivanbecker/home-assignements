@@ -13,10 +13,10 @@ describe('config', () => {
   });
 
   describe('defaults', () => {
-    it('should use port 3000 when PORT is not set', async () => {
+    it('should use port 3018 when PORT is not set', async () => {
       delete process.env['PORT'];
       const { config } = await import('../src/config');
-      expect(config.port).toBe(3000);
+      expect(config.port).toBe(3018);
     });
 
     it('should use 127.0.0.1 when HOST is not set', async () => {
